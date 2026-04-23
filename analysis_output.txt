@@ -1,0 +1,142 @@
+Analyzing acara...                                              
+
+warning • Unused import: '../constants/app_constants.dart' • lib/core/theme/app_theme.dart:4:8 • unused_import
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/booking_confirmation_screen.dart:16:45 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/booking_confirmation_screen.dart:42:41 • unnecessary_question_mark
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/booking_confirmation_screen.dart:93:38 • undefined_getter
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/payment_screen.dart:63:34 • undefined_getter
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/ticket_selection_screen.dart:77:32 • undefined_getter
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/view_ticket_screen.dart:43:34 • undefined_getter
+  error • Invalid constant value • lib/features/checkout/presentation/view_ticket_screen.dart:182:38 • invalid_constant
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/view_ticket_screen.dart:182:48 • undefined_getter
+  error • Invalid constant value • lib/features/checkout/presentation/view_ticket_screen.dart:193:38 • invalid_constant
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/view_ticket_screen.dart:193:48 • undefined_getter
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/checkout/presentation/view_ticket_screen.dart:239:48 • undefined_getter
+  error • Invalid constant value • lib/features/event_detail/presentation/event_detail_screen.dart:136:30 • invalid_constant
+  error • The getter 'backgroundLight' isn't defined for the type 'AppColors' • lib/features/event_detail/presentation/event_detail_screen.dart:136:40 • undefined_getter
+  error • The getter 'primaryLight' isn't defined for the type 'AppColors' • lib/features/event_detail/presentation/event_detail_screen.dart:174:60 • undefined_getter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/event_detail/presentation/event_detail_screen.dart:243:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/event_detail/presentation/event_detail_screen.dart:307:31 • deprecated_member_use
+warning • Unused import: '../../../core/utils/location_utils.dart' • lib/features/explore/presentation/explore_screen.dart:7:8 • unused_import
+warning • Unused import: '../../../models/event_model.dart' • lib/features/explore/presentation/explore_screen.dart:8:8 • unused_import
+warning • Unused import: '../../../services/event_service.dart' • lib/features/explore/presentation/explore_screen.dart:11:8 • unused_import
+warning • The value of the local variable 'currentUser' isn't used • lib/features/explore/presentation/explore_screen.dart:192:11 • unused_local_variable
+   info • Unnecessary use of multiple underscores • lib/features/explore/presentation/explore_screen.dart:287:37 • unnecessary_underscores
+   info • The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('({String city, String? countryCode})') • lib/features/explore/presentation/explore_screen.dart:290:35 • unrelated_type_equality_checks
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/explore/presentation/explore_screen.dart:313:46 • undefined_getter
+   info • Unnecessary use of multiple underscores • lib/features/explore/presentation/explore_screen.dart:352:39 • unnecessary_underscores
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/explore/presentation/explore_screen.dart:395:48 • undefined_getter
+warning • Unused import: '../../../services/app_preferences_service.dart' • lib/features/home/presentation/home_screen.dart:12:8 • unused_import
+warning • The value of the local variable 'now' isn't used • lib/features/home/presentation/home_screen.dart:42:11 • unused_local_variable
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:181:29 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:202:31 • unnecessary_underscores
+warning • The declaration '_distanceForUser' isn't referenced • lib/features/home/presentation/home_screen.dart:265:8 • unused_element
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/main/presentation/main_screen.dart:2:8 • unused_import
+warning • Unused import: '../../../services/event_service.dart' • lib/features/map/presentation/map_screen.dart:13:8 • unused_import
+   info • Unnecessary use of multiple underscores • lib/features/map/presentation/map_screen.dart:167:24 • unnecessary_underscores
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:309:36 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:310:35 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:311:35 • invalid_null_aware_operator
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/onboarding/presentation/city_selection_screen.dart:110:38 • undefined_getter
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/city_selection_screen.dart:141:35 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/city_selection_screen.dart:174:35 • unnecessary_underscores
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/onboarding/presentation/city_selection_screen.dart:205:28 • undefined_getter
+  error • The getter 'surfaceWhite' isn't defined for the type 'AppColors' • lib/features/onboarding/presentation/interest_selection_screen.dart:93:48 • undefined_getter
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/location_permission_screen.dart:367:29 • unnecessary_underscores
+warning • Unused import: '../../../core/constants/app_constants.dart' • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:4:8 • unused_import
+  error • Missing concrete implementation of 'State.build' • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:16:7 • non_abstract_class_inherits_abstract_member
+  error • The instance member 'ref' can't be accessed in an initializer • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:78:18 • implicit_this_reference_in_initializer
+  error • The instance member 'user' can't be accessed in an initializer • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:79:31 • implicit_this_reference_in_initializer
+  error • The instance member 'user' can't be accessed in an initializer • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:79:53 • implicit_this_reference_in_initializer
+  error • The instance member 'user' can't be accessed in an initializer • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:79:77 • implicit_this_reference_in_initializer
+  error • The instance member 'user' can't be accessed in an initializer • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:79:91 • implicit_this_reference_in_initializer
+  error • Expected a class member • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:81:5 • expected_class_member
+   info • Missing type annotation • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:81:12 • strict_top_level_inference
+   info • The variable name 'Scaffold' isn't a lowerCamelCase identifier • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:81:12 • non_constant_identifier_names
+  error • 'Scaffold' must have a method body because '_NameAvatarSelectionScreenState' isn't abstract • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:81:12 • concrete_class_with_abstract_member
+   info • Missing type annotation • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:82:7 • strict_top_level_inference
+  error • Named parameters must be enclosed in curly braces ('{' and '}') • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:82:22 • named_parameter_outside_group
+  error • Using a colon as the separator before a default value is no longer supported • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:82:22 • obsolete_colon_for_default_value
+   info • Missing type annotation • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:83:7 • strict_top_level_inference
+  error • Named parameters must be enclosed in curly braces ('{' and '}') • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:83:13 • named_parameter_outside_group
+  error • Using a colon as the separator before a default value is no longer supported • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:83:13 • obsolete_colon_for_default_value
+  error • The default value of an optional parameter must be constant • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:83:15 • non_constant_default_value
+   info • Missing type annotation • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:92:7 • strict_top_level_inference
+  error • Named parameters must be enclosed in curly braces ('{' and '}') • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:92:11 • named_parameter_outside_group
+  error • Using a colon as the separator before a default value is no longer supported • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:92:11 • obsolete_colon_for_default_value
+  error • The default value of an optional parameter must be constant • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:92:13 • non_constant_default_value
+  error • Expected a method, getter, setter or operator declaration • lib/features/onboarding/presentation/name_avatar_selection_screen.dart:227:1 • expected_executable
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:56:43 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:64:43 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:110:42 • unnecessary_question_mark
+   info • The 'child' argument should be last in widget constructor invocations • lib/features/profile/presentation/payment_methods_screen.dart:101:21 • sort_child_properties_last
+warning • Unused import: '../../../core/constants/app_constants.dart' • lib/features/profile/presentation/profile_screen.dart:5:8 • unused_import
+warning • Unused import: '../../../core/constants/app_constants.dart' • lib/features/shared/presentation/ai_assistant_screen.dart:3:8 • unused_import
+   info • Unnecessary use of multiple underscores • lib/features/shared/presentation/notifications_screen.dart:54:37 • unnecessary_underscores
+  error • The method 'getAiResponse' isn't defined for the type 'AiService' • lib/services/ai_chat_notifier.dart:41:40 • undefined_method
+warning • The declaration '<unnamed>' isn't referenced • lib/services/ai_service.dart:7:7 • unused_element
+warning • The value of the field '_ref' isn't used • lib/services/ai_service.dart:8:13 • unused_field
+warning • The value of the field '_baseUrl' isn't used • lib/services/ai_service.dart:10:23 • unused_field
+  error • Constructors can't have a return type • lib/services/ai_service.dart:15:5 • constructor_with_return_type
+  error • All final variables must be initialized, but '_ref' isn't • lib/services/ai_service.dart:15:11 • final_not_initialized_constructor
+  error • The name of a constructor must match the name of the enclosing class • lib/services/ai_service.dart:15:11 • invalid_constructor_name
+  error • Can't have modifier 'const' here • lib/services/ai_service.dart:15:26 • extraneous_modifier
+  error • Function-typed parameters can't specify 'const', 'final' or 'var' in place of a return type • lib/services/ai_service.dart:15:26 • function_typed_parameter_var
+   info • The variable name 'Duration' isn't a lowerCamelCase identifier • lib/services/ai_service.dart:15:32 • non_constant_identifier_names
+   info • Use the generic function type syntax to declare the parameter 'Duration' • lib/services/ai_service.dart:15:32 • use_function_type_syntax_for_parameters
+  error • Named parameters must be enclosed in curly braces ('{' and '}') • lib/services/ai_service.dart:15:53 • named_parameter_outside_group
+  error • Using a colon as the separator before a default value is no longer supported • lib/services/ai_service.dart:15:53 • obsolete_colon_for_default_value
+  error • Undefined name 'message' • lib/services/ai_service.dart:17:19 • undefined_identifier
+  error • Expected a class member • lib/services/ai_service.dart:20:5 • expected_class_member
+  error • Expected an identifier • lib/services/ai_service.dart:20:8 • missing_identifier
+   info • Use the generic function type syntax to declare the parameter '' • lib/services/ai_service.dart:20:9 • use_function_type_syntax_for_parameters
+  error • The prefix 'query' can't be used here because it's shadowed by a local declaration • lib/services/ai_service.dart:20:9 • prefix_shadowed_by_local_declaration
+  error • Expected an identifier • lib/services/ai_service.dart:20:23 • missing_identifier
+  error • Expected an identifier • lib/services/ai_service.dart:20:24 • missing_identifier
+  error • Expected to find ')' • lib/services/ai_service.dart:20:37 • expected_token
+  error • Undefined name 'events' • lib/services/ai_service.dart:21:11 • undefined_identifier
+  error • Undefined name 'events' • lib/services/ai_service.dart:22:23 • undefined_identifier
+  error • Expected a class member • lib/services/ai_service.dart:29:5 • expected_class_member
+  error • Expected an identifier • lib/services/ai_service.dart:29:8 • missing_identifier
+   info • Use the generic function type syntax to declare the parameter '' • lib/services/ai_service.dart:29:9 • use_function_type_syntax_for_parameters
+  error • The prefix 'query' can't be used here because it's shadowed by a local declaration • lib/services/ai_service.dart:29:9 • prefix_shadowed_by_local_declaration
+  error • Expected an identifier • lib/services/ai_service.dart:29:23 • missing_identifier
+  error • Expected an identifier • lib/services/ai_service.dart:29:24 • missing_identifier
+  error • Undefined name 'events' • lib/services/ai_service.dart:30:26 • undefined_identifier
+  error • Expected a class member • lib/services/ai_service.dart:37:5 • expected_class_member
+  error • Expected an identifier • lib/services/ai_service.dart:37:8 • missing_identifier
+   info • Use the generic function type syntax to declare the parameter '' • lib/services/ai_service.dart:37:9 • use_function_type_syntax_for_parameters
+  error • The prefix 'query' can't be used here because it's shadowed by a local declaration • lib/services/ai_service.dart:37:9 • prefix_shadowed_by_local_declaration
+  error • Expected an identifier • lib/services/ai_service.dart:37:23 • missing_identifier
+  error • Expected an identifier • lib/services/ai_service.dart:37:24 • missing_identifier
+  error • Expected to find ')' • lib/services/ai_service.dart:37:33 • expected_token
+  error • Undefined name 'events' • lib/services/ai_service.dart:38:26 • undefined_identifier
+  error • Expected a class member • lib/services/ai_service.dart:46:5 • expected_class_member
+  error • Expected an identifier • lib/services/ai_service.dart:46:8 • missing_identifier
+   info • Use the generic function type syntax to declare the parameter '' • lib/services/ai_service.dart:46:9 • use_function_type_syntax_for_parameters
+  error • The prefix 'query' can't be used here because it's shadowed by a local declaration • lib/services/ai_service.dart:46:9 • prefix_shadowed_by_local_declaration
+  error • Expected an identifier • lib/services/ai_service.dart:46:23 • missing_identifier
+  error • Expected an identifier • lib/services/ai_service.dart:46:24 • missing_identifier
+  error • Expected to find ')' • lib/services/ai_service.dart:46:34 • expected_token
+  error • Expected a class member • lib/services/ai_service.dart:50:5 • expected_class_member
+  error • Expected an identifier • lib/services/ai_service.dart:50:8 • missing_identifier
+   info • Use the generic function type syntax to declare the parameter '' • lib/services/ai_service.dart:50:9 • use_function_type_syntax_for_parameters
+  error • The prefix 'query' can't be used here because it's shadowed by a local declaration • lib/services/ai_service.dart:50:9 • prefix_shadowed_by_local_declaration
+  error • Expected an identifier • lib/services/ai_service.dart:50:23 • missing_identifier
+  error • Expected an identifier • lib/services/ai_service.dart:50:24 • missing_identifier
+  error • Expected to find ')' • lib/services/ai_service.dart:50:34 • expected_token
+  error • Expected a class member • lib/services/ai_service.dart:55:5 • expected_class_member
+  error • Expected a class member • lib/services/ai_service.dart:55:12 • expected_class_member
+  error • Expected a class member • lib/services/ai_service.dart:55:186 • expected_class_member
+warning • Unused import: 'bookmark_service.dart' • lib/services/auth_service.dart:4:8 • unused_import
+warning • The value of the field '_ref' isn't used • lib/services/auth_service.dart:93:13 • unused_field
+   info • Don't invoke 'print' in production code • lib/services/bookmark_service.dart:40:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bookmark_service.dart:70:7 • avoid_print
+warning • Unused import: 'dart:convert' • lib/services/event_api_service.dart:1:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/event_api_service.dart:34:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/event_api_service.dart:43:7 • avoid_print
+warning • Unused import: '../core/constants/app_constants.dart' • lib/widgets/event_card.dart:6:8 • unused_import
+warning • The value of the local variable 'isBookmarked' isn't used • lib/widgets/event_card.dart:45:11 • unused_local_variable
+   info • Unnecessary use of string interpolation • lib/widgets/event_card.dart:80:23 • unnecessary_string_interpolations
+warning • The declaration '_distanceLabel' isn't referenced • lib/widgets/event_card.dart:201:8 • unused_element
+

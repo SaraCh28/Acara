@@ -1,0 +1,48 @@
+Analyzing acara...                                              
+
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/booking_confirmation_screen.dart:16:45 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/booking_confirmation_screen.dart:42:41 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/view_ticket_screen.dart:17:45 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/checkout/presentation/view_ticket_screen.dart:30:41 • unnecessary_question_mark
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/event_detail/presentation/event_detail_screen.dart:243:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/event_detail/presentation/event_detail_screen.dart:307:31 • deprecated_member_use
+warning • Unused import: '../../../core/utils/location_utils.dart' • lib/features/explore/presentation/explore_screen.dart:7:8 • unused_import
+warning • Unused import: '../../../models/event_model.dart' • lib/features/explore/presentation/explore_screen.dart:8:8 • unused_import
+warning • Unused import: '../../../services/event_service.dart' • lib/features/explore/presentation/explore_screen.dart:11:8 • unused_import
+warning • The value of the local variable 'currentUser' isn't used • lib/features/explore/presentation/explore_screen.dart:192:11 • unused_local_variable
+   info • Unnecessary use of multiple underscores • lib/features/explore/presentation/explore_screen.dart:287:37 • unnecessary_underscores
+   info • The type of the right operand ('String') isn't a subtype or a supertype of the left operand ('({String city, String? countryCode})') • lib/features/explore/presentation/explore_screen.dart:290:35 • unrelated_type_equality_checks
+   info • Unnecessary use of multiple underscores • lib/features/explore/presentation/explore_screen.dart:352:39 • unnecessary_underscores
+warning • Unused import: '../../../services/event_service.dart' • lib/features/home/presentation/home_screen.dart:11:8 • unused_import
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:210:35 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:324:31 • unnecessary_underscores
+warning • Unused import: '../../../services/event_service.dart' • lib/features/map/presentation/map_screen.dart:13:8 • unused_import
+   info • Unnecessary use of multiple underscores • lib/features/map/presentation/map_screen.dart:167:24 • unnecessary_underscores
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:309:36 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:310:35 • invalid_null_aware_operator
+warning • The receiver can't be null, so the null-aware operator '?.' is unnecessary • lib/features/map/presentation/map_screen.dart:311:35 • invalid_null_aware_operator
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/city_selection_screen.dart:141:35 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/city_selection_screen.dart:174:35 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/onboarding/presentation/location_permission_screen.dart:367:29 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/onboarding/presentation/onboarding_screen.dart:134:38 • deprecated_member_use
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:56:43 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:64:43 • unnecessary_question_mark
+warning • The '?' is unnecessary because 'dynamic' is nullable without it • lib/features/profile/presentation/my_bookings_screen.dart:110:42 • unnecessary_question_mark
+   info • The 'child' argument should be last in widget constructor invocations • lib/features/profile/presentation/payment_methods_screen.dart:101:21 • sort_child_properties_last
+   info • Unnecessary use of multiple underscores • lib/features/shared/presentation/notifications_screen.dart:54:37 • unnecessary_underscores
+warning • The method doesn't override an inherited method • lib/main.dart:17:19 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/main.dart:22:16 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/main.dart:27:16 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • lib/main.dart:32:16 • override_on_non_overriding_member
+warning • Unused import: '../models/event_model.dart' • lib/services/ai_service.dart:4:8 • unused_import
+warning • Unused import: 'bookmark_service.dart' • lib/services/auth_service.dart:4:8 • unused_import
+warning • The value of the field '_ref' isn't used • lib/services/auth_service.dart:93:13 • unused_field
+   info • Don't invoke 'print' in production code • lib/services/bookmark_service.dart:40:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/bookmark_service.dart:70:7 • avoid_print
+warning • Unused import: 'dart:convert' • lib/services/event_api_service.dart:1:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/event_api_service.dart:34:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/event_api_service.dart:43:7 • avoid_print
+   info • Unnecessary use of multiple underscores • lib/widgets/event_card.dart:86:43 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/widgets/event_card.dart:208:43 • unnecessary_underscores
+
+44 issues found. (ran in 2.6s)
