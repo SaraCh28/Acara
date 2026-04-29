@@ -2,14 +2,17 @@ import { EventModel, IAdapter } from "../types.ts";
 
 export class EventbriteAdapter implements IAdapter {
   private token = Deno.env.get("EVENTBRITE_OAUTH_TOKEN") || "";
+  private organizationId = Deno.env.get("EVENTBRITE_USER_ID") || "";
 
   async fetchEvents(city: string, country: string, keyword: string = "", lat?: number, lng?: number): Promise<EventModel[]> {
     if (!this.token) return [];
     
-    let url = `https://www.eventbriteapi.com/v3/events/search/?q=${keyword}&expand=venue,organizer`;
+    // Note: Eventbrite's public search endpoint is restricted. 
+    // We try to search by location if possible.
+    let url = `https://www.eventbriteapi.com/v3/destinations/events/search/?q=${encodeURIComponent(keyword)}&expand=venue`;
     
     if (city) {
-      url += `&location.address=${encodeURIComponent(city)},${country}`;
+      url += `&location.address=${encodeURIComponent(city)}`;
     } else if (lat !== undefined && lng !== undefined) {
       url += `&location.latitude=${lat}&location.longitude=${lng}&location.within=100km`;
     }
@@ -26,14 +29,18 @@ export class EventbriteAdapter implements IAdapter {
       }
 
       const data = await response.json();
+      const eventsList = data.events || data.results || [];
       
-      if (!data.events || !Array.isArray(data.events)) {
+      if (!Array.isArray(eventsList) || eventsList.length === 0) {
         console.log("No events found in Eventbrite response.");
         return [];
       }
       
-      return data.events.map((event: any): EventModel => ({
-        id: event.id,
+      return eventsList.map((event: any): EventModel => ({
+        id: `eventbrite-${event.id}`,
+        legacyId: String(event.id),
+        sourceId: "eventbrite",
+        sourceName: "Eventbrite",
         title: event.name?.text || "Untitled Event",
         description: event.description?.text || "No description available",
         category: "Major Events",

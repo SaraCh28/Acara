@@ -47,12 +47,11 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Concierge'),
+        title: const Text('Acara AI Assistant'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
+            icon: const Icon(Icons.delete_outline),
             onPressed: () => ref.read(aiChatProvider.notifier).clearChat(),
           ),
         ],
@@ -64,7 +63,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 ? _buildEmptyState()
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
                     itemCount: chatState.messages.length + (chatState.isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == chatState.messages.length) {
@@ -83,46 +82,39 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.auto_awesome, size: 48, color: AppColors.accent),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'How may I serve you?',
-              style: Theme.of(context).textTheme.displaySmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'I am your bespoke assistant for discovering the world\'s most exceptional gatherings.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, height: 1.5),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.auto_awesome, size: 64, color: AppColors.primary.withValues(alpha: 0.5)),
+          const SizedBox(height: 16),
+          Text(
+            'How can I help you today?',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Find events, ask about policies, or get recommendations.',
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildLoadingBubble() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
-      child: SizedBox(
-        width: 40,
-        height: 2,
-        child: LinearProgressIndicator(
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
     );
@@ -130,46 +122,49 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
   Widget _buildInputArea() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-      color: AppColors.background,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Ask your concierge...',
-                fillColor: AppColors.surface,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onSubmitted: (text) {
-                ref.read(aiChatProvider.notifier).sendMessage(text);
-                _controller.clear();
-              },
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () {
-              ref.read(aiChatProvider.notifier).sendMessage(_controller.text);
-              _controller.clear();
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.send_rounded, color: AppColors.accent, size: 20),
-            ),
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
           ),
         ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: 'Ask about events...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+                onSubmitted: (text) {
+                  ref.read(aiChatProvider.notifier).sendMessage(text);
+                  _controller.clear();
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            FloatingActionButton.small(
+              onPressed: () {
+                ref.read(aiChatProvider.notifier).sendMessage(_controller.text);
+                _controller.clear();
+              },
+              child: const Icon(Icons.send),
+            ),
+          ],
+        ),
       ),
     );
   }

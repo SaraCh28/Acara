@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import '../../../models/event_model.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../services/checkout_service.dart';
 import '../../../services/event_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/bookmark_service.dart';
@@ -16,13 +16,7 @@ class EventDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final events = ref.watch(eventsProvider);
-    
-    // Find event safely
-    final event = events.cast<EventModel?>().firstWhere(
-      (e) => e?.id == eventId,
-      orElse: () => null,
-    );
+    final event = ref.watch(eventByIdProvider(eventId));
 
     if (event == null) {
       return Scaffold(
@@ -35,7 +29,7 @@ class EventDetailScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               const Text('Sorry, we couldn\'t find this event details.'),
               TextButton(
-                onPressed: () => context.pop(),
+                onPressed: () => _goBack(context),
                 child: const Text('Go Back'),
               ),
             ],
@@ -48,7 +42,11 @@ class EventDetailScreen extends ConsumerWidget {
     final isBookmarked = currentUser != null
         ? ref
               .watch(userBookmarksProvider.notifier)
-              .isBookmarked(currentUser.id, event.id)
+              .isBookmarked(
+                currentUser.id,
+                event.id,
+                alternateEventIds: event.lookupIds.skip(1),
+              )
         : false;
 
     return Scaffold(
@@ -95,7 +93,7 @@ class EventDetailScreen extends ConsumerWidget {
                           children: [
                             _GlassButton(
                               icon: Icons.arrow_back,
-                              onTap: () => context.pop(),
+                              onTap: () => _goBack(context),
                             ),
                             Row(
                               children: [
@@ -113,6 +111,8 @@ class EventDetailScreen extends ConsumerWidget {
                                           .toggleBookmark(
                                             currentUser.id,
                                             event.id,
+                                            alternateEventIds:
+                                                event.lookupIds.skip(1),
                                           );
                                     }
                                   },
@@ -240,7 +240,7 @@ class EventDetailScreen extends ConsumerWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     offset: const Offset(0, -5),
                     blurRadius: 10,
                   ),
@@ -270,7 +270,14 @@ class EventDetailScreen extends ConsumerWidget {
                     const SizedBox(width: AppConstants.paddingLarge),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => context.push('/booking/${event.id}'),
+                        onPressed: () {
+                          ref.read(checkoutEventProvider.notifier).setEvent(event);
+                          context.goNamed(
+                            'booking',
+                            pathParameters: {'id': event.id},
+                            extra: event,
+                          );
+                        },
                         child: const Text('Buy Ticket'),
                       ),
                     ),
@@ -282,6 +289,14 @@ class EventDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+void _goBack(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go('/home');
   }
 }
 
@@ -304,7 +319,7 @@ class _GlassButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: color, size: 24),

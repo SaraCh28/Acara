@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/event_model.dart';
 import '../../../services/event_service.dart';
 import '../../../widgets/event_card.dart';
 
@@ -18,7 +19,9 @@ class CategoryEventsScreen extends ConsumerWidget {
         ref
             .watch(eventsProvider)
             .where(
-              (event) => event.category.toLowerCase() == category.toLowerCase(),
+              (event) =>
+                  EventModel.normalizeCategory(event.category).toLowerCase() ==
+                  EventModel.normalizeCategory(category).toLowerCase(),
             )
             .toList()
           ..sort((first, second) => first.date.compareTo(second.date));

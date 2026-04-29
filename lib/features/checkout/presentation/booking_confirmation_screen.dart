@@ -3,18 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/event_model.dart';
+import '../../../services/checkout_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/event_service.dart';
 
 class BookingConfirmationScreen extends ConsumerWidget {
   final String bookingId;
-  const BookingConfirmationScreen({super.key, required this.bookingId});
+  final EventModel? initialEvent;
+  const BookingConfirmationScreen({super.key, required this.bookingId, this.initialEvent});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allBookings = ref.watch(userBookingsProvider);
-    final booking = allBookings.cast<dynamic?>().firstWhere(
-      (b) => b?.id == bookingId,
+    final booking = allBookings.cast<dynamic>().firstWhere(
+      (b) => b.id == bookingId,
       orElse: () => null,
     );
 
@@ -38,11 +41,7 @@ class BookingConfirmationScreen extends ConsumerWidget {
       );
     }
 
-    final allEvents = ref.watch(eventsProvider);
-    final event = allEvents.cast<dynamic?>().firstWhere(
-      (e) => e?.id == booking.eventId,
-      orElse: () => null,
-    );
+    final event = initialEvent ?? ref.watch(eventByIdProvider(booking.eventId)) ?? ref.watch(checkoutEventProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -133,7 +132,11 @@ class BookingConfirmationScreen extends ConsumerWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  context.push('/view_ticket/$bookingId');
+                  context.pushNamed(
+                    'view_ticket',
+                    pathParameters: {'id': bookingId},
+                    extra: event,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

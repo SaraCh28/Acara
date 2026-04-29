@@ -42,7 +42,10 @@ export class LocalEventsAdapter implements IAdapter {
       if (!data) return [];
 
       return data.map((event: any): EventModel => ({
-        id: event.id,
+        id: `local-${event.id}`,
+        legacyId: String(event.id),
+        sourceId: "local",
+        sourceName: "Local Events",
         title: event.title,
         description: event.description || "No description available",
         category: event.category,

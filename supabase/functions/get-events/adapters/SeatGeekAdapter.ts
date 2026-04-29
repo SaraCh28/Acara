@@ -31,7 +31,10 @@ export class SeatGeekAdapter implements IAdapter {
       if (!data.events || !Array.isArray(data.events)) return [];
 
       return data.events.map((event: any): EventModel => ({
-        id: `sg-${event.id}`,
+        id: `seatgeek-${event.id}`,
+        legacyId: String(event.id),
+        sourceId: "seatgeek",
+        sourceName: "SeatGeek",
         title: event.title,
         description: event.description || event.short_title || "No description available",
         category: event.type ? event.type.replace('_', ' ') : "General",

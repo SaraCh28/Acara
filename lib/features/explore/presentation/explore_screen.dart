@@ -4,11 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/utils/location_utils.dart';
-import '../../../models/event_model.dart';
 import '../../../services/app_preferences_service.dart';
 import '../../../services/auth_service.dart';
-import '../../../services/event_service.dart';
 import '../../../services/events_notifier.dart';
 import '../../../widgets/event_card.dart';
 
@@ -189,7 +186,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = ref.watch(currentUserProvider);
     final eventsAsync = ref.watch(eventsNotifierProvider);
     final searchHistory = ref.watch(appPreferencesProvider).searchHistory;
 
@@ -421,6 +417,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               data: (allEvents) {
                 // local filtering for price & date (TM doesn't always support minPrice easily in Discovery API)
                 final filtered = allEvents.where((e) {
+                  final matchesCategory = _selectedCategory == 'All' ||
+                      normalizeCategoryLabel(e.category).toLowerCase() ==
+                          normalizeCategoryLabel(_selectedCategory).toLowerCase();
                   final matchesPrice = e.price >= _priceRange.start &&
                       e.price <= _priceRange.end;
                   final matchesDate = switch (_selectedDate) {
@@ -432,52 +431,78 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     'This month' => e.date.month == DateTime.now().month,
                     _ => true,
                   };
-                  return matchesPrice && matchesDate;
+                  return matchesCategory && matchesPrice && matchesDate;
                 }).toList();
+                final deduped = dedupeEventsByLocation(filtered);
+                final grouped = groupEventsByCategory(deduped);
+                final groupedEntries = grouped.entries.toList()
+                  ..sort((first, second) => first.key.compareTo(second.key));
 
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppConstants.paddingLarge),
-                      child: Row(
+                return deduped.isEmpty
+                    ? _buildEmptyState()
+                    : ListView(
+                        padding: const EdgeInsets.only(
+                          left: AppConstants.paddingLarge,
+                          right: AppConstants.paddingLarge,
+                          bottom: AppConstants.paddingLarge,
+                        ),
                         children: [
-                          Text(
-                            '${filtered.length} event${filtered.length == 1 ? '' : 's'}'
-                            '${_selectedLocationFilter != null ? ' in $_selectedLocationFilter' : ''}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textSecondary),
+                          Row(
+                            children: [
+                              Text(
+                                '${deduped.length} event${deduped.length == 1 ? '' : 's'}'
+                                '${_selectedLocationFilter != null ? ' in $_selectedLocationFilter' : ''}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: filtered.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: AppConstants.paddingLarge),
-                              itemCount: filtered.length,
-                              itemBuilder: (context, index) {
-                                final event = filtered[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: AppConstants.paddingMedium),
+                          const SizedBox(height: 12),
+                          ...groupedEntries.expand((entry) {
+                            final category = entry.key;
+                            final events = entry.value;
+                            return [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        category,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${events.length} item${events.length == 1 ? '' : 's'}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: AppColors.textSecondary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              ...events.map(
+                                (event) => Padding(
+                                  padding: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
                                   child: EventCard(
                                     event: event,
                                     isHorizontal: true,
-                                    onTap: () =>
-                                        context.push('/event/${event.id}'),
+                                    onTap: () => context.push('/event/${event.id}'),
                                   ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                );
+                                ),
+                              ),
+                              const SizedBox(height: AppConstants.paddingSmall),
+                            ];
+                          }),
+                        ],
+                      );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, stack) => Center(

@@ -6,7 +6,7 @@ import '../../../services/app_preferences_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/payment_service.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/branded_logo.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -60,62 +60,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: AppTheme.lightTheme,
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary,
-                AppColors.backgroundLight,
-              ],
-            ),
-          ),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
         child: Center(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                  ),
-                  child: const Icon(Icons.event_available, size: 80, color: AppColors.accent),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.18),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'ACARA',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: AppColors.textPrimaryLight,
-                    letterSpacing: 8,
-                    fontWeight: FontWeight.w200,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  height: 2,
-                  width: 40,
-                  color: AppColors.accent,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'EXCEPTIONAL EXPERIENCES',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.textSecondaryLight,
-                    letterSpacing: 4,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+              ),
+              child: const BrandedLogo(
+                size: 104,
+                tagline: 'Find events worth leaving home for',
+              ),
             ),
-          ),
           ),
         ),
       ),

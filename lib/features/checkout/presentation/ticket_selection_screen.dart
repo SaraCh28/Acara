@@ -7,10 +7,12 @@ import '../../../services/event_service.dart';
 import '../../../services/checkout_service.dart';
 import '../../../models/checkout_draft_model.dart';
 import 'package:intl/intl.dart';
+import '../../../models/event_model.dart';
 
 class TicketSelectionScreen extends ConsumerStatefulWidget {
   final String eventId;
-  const TicketSelectionScreen({super.key, required this.eventId});
+  final EventModel? initialEvent;
+  const TicketSelectionScreen({super.key, required this.eventId, this.initialEvent});
 
   @override
   ConsumerState<TicketSelectionScreen> createState() =>
@@ -20,76 +22,148 @@ class TicketSelectionScreen extends ConsumerStatefulWidget {
 class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
   int _vipCount = 0;
   int _regularCount = 1;
+  EventModel? _resolvedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolvedEvent = widget.initialEvent ?? ref.read(eventByIdProvider(widget.eventId)) ?? ref.read(checkoutEventProvider);
+
+    if (_resolvedEvent != null && ref.read(checkoutEventProvider) == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(checkoutEventProvider.notifier).setEvent(_resolvedEvent!);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final event = ref
-        .watch(eventsProvider)
-        .firstWhere((e) => e.id == widget.eventId);
+    final checkoutEvent = ref.watch(checkoutEventProvider);
+    final event = _resolvedEvent ?? widget.initialEvent ?? checkoutEvent ?? ref.watch(eventByIdProvider(widget.eventId));
 
-    final total = (_vipCount * 100) + (_regularCount * event.price);
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Select Tickets')),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(AppConstants.paddingLarge),
+    if (event == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Select Tickets')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingLarge),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                const Icon(Icons.event_busy, size: 64, color: AppColors.textSecondary),
+                const SizedBox(height: 16),
                 Text(
-                  event.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  'We could not load this event.',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '${DateFormat('d MMM yyyy').format(event.date)} • ${event.venue}, ${event.city}',
-                  style: const TextStyle(color: AppColors.textSecondary),
+                const Text(
+                  'Please go back and try opening the event again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textSecondary),
                 ),
-                const SizedBox(height: 32),
-
-                _buildTicketRow(
-                  title: 'VIP Ticket',
-                  price: 100.0,
-                  count: _vipCount,
-                  onIncrement: () => setState(() => _vipCount++),
-                  onDecrement: () => setState(() {
-                    if (_vipCount > 0) _vipCount--;
-                  }),
-                ),
-                const Divider(height: 32),
-                _buildTicketRow(
-                  title: 'Regular Ticket',
-                  price: event.price,
-                  count: _regularCount,
-                  onIncrement: () => setState(() => _regularCount++),
-                  onDecrement: () => setState(() {
-                    if (_regularCount > 0) _regularCount--;
-                  }),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Go Back'),
                 ),
               ],
             ),
           ),
+        ),
+      );
+    }
 
-          Container(
-            padding: const EdgeInsets.all(AppConstants.paddingLarge),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    if (_resolvedEvent == null) {
+      _resolvedEvent = event;
+    }
+
+    final total = (_vipCount * 100) + (_regularCount * event.price);
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      appBar: AppBar(title: const Text('Select Tickets')),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppConstants.paddingLarge),
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppConstants.paddingLarge),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  Text(
+                    event.title,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${DateFormat('d MMM yyyy').format(event.date)} • ${event.venue}, ${event.city}',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Choose your tickets below',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            _buildTicketRow(
+              title: 'VIP Ticket',
+              price: 100.0,
+              count: _vipCount,
+              onIncrement: () => setState(() => _vipCount++),
+              onDecrement: () => setState(() {
+                if (_vipCount > 0) _vipCount--;
+              }),
+            ),
+            const SizedBox(height: 16),
+            _buildTicketRow(
+              title: 'Regular Ticket',
+              price: event.price,
+              count: _regularCount,
+              onIncrement: () => setState(() => _regularCount++),
+              onDecrement: () => setState(() {
+                if (_regularCount > 0) _regularCount--;
+              }),
+            ),
+            const SizedBox(height: 24),
+
+            Container(
+              padding: const EdgeInsets.all(AppConstants.paddingLarge),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Total',
@@ -102,10 +176,10 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: (_vipCount + _regularCount) > 0
                         ? () {
-                            // Save the draft before navigating
                             final draft = CheckoutDraftModel(
                               eventId: widget.eventId,
                               regularCount: _regularCount,
@@ -113,27 +187,22 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
                               regularPrice: event.price,
                               vipPrice: 100.0,
                             );
-                            ref
-                                .read(checkoutDraftProvider.notifier)
-                                .saveDraft(draft);
-                            context.push(
-                              '/contact_info/${widget.eventId}',
+                            ref.read(checkoutDraftProvider.notifier).saveDraft(draft);
+                            ref.read(checkoutEventProvider.notifier).setEvent(event);
+                            context.pushNamed(
+                              'contact_info',
+                              pathParameters: {'id': widget.eventId},
+                              extra: event,
                             );
                           }
                         : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                    ),
                     child: const Text('Continue'),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

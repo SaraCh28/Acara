@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/event_model.dart';
 import 'event_api_service.dart';
 import 'auth_service.dart';
+import 'app_preferences_service.dart';
 
 /// Represents the parameters for an event search query.
 class EventsQuery {
@@ -68,11 +69,13 @@ class EventsQueryNotifier extends Notifier<EventsQuery> {
   @override
   EventsQuery build() {
     final user = ref.watch(currentUserProvider);
+    final prefs = ref.watch(appPreferencesProvider);
+    
     return EventsQuery(
-      city: user?.city,
-      country: user?.countryCode ?? 'PK', // Default to PK if unknown
-      lat: user?.latitude,
-      lng: user?.longitude,
+      city: prefs.selectedCity ?? user?.city,
+      country: prefs.selectedCountryCode ?? user?.countryCode,
+      lat: prefs.latitude ?? user?.latitude,
+      lng: prefs.longitude ?? user?.longitude,
     );
   }
 
@@ -105,14 +108,91 @@ class EventsQueryNotifier extends Notifier<EventsQuery> {
 
 final eventsQueryProvider = NotifierProvider<EventsQueryNotifier, EventsQuery>(EventsQueryNotifier.new);
 
+String normalizeCategoryLabel(String category) {
+  return EventModel.normalizeCategory(category);
+}
+
+Map<String, List<EventModel>> groupEventsByCategory(Iterable<EventModel> events) {
+  final grouped = <String, List<EventModel>>{};
+
+  for (final event in events) {
+    final key = normalizeCategoryLabel(event.category);
+    grouped.putIfAbsent(key, () => []).add(event);
+  }
+
+  for (final entry in grouped.entries) {
+    entry.value.sort((first, second) => first.date.compareTo(second.date));
+  }
+
+  return grouped;
+}
+
+int _sourcePriority(String sourceId) {
+  switch (sourceId.toLowerCase()) {
+    case 'ticketmaster':
+      return 0;
+    case 'eventbrite':
+      return 1;
+    case 'seatgeek':
+      return 2;
+    case 'local':
+      return 3;
+    case 'google_places':
+      return 4;
+    default:
+      return 5;
+  }
+}
+
+List<EventModel> dedupeEventsByLocation(Iterable<EventModel> events) {
+  final deduped = <String, EventModel>{};
+
+  for (final event in events) {
+    final key = event.locationFingerprint;
+    final existing = deduped[key];
+    if (existing == null) {
+      deduped[key] = event;
+      continue;
+    }
+
+    final existingPriority = _sourcePriority(existing.sourceId);
+    final incomingPriority = _sourcePriority(event.sourceId);
+    final shouldReplace = incomingPriority < existingPriority ||
+        (incomingPriority == existingPriority && event.attendeeCount > existing.attendeeCount);
+
+    if (shouldReplace) {
+      deduped[key] = event;
+    }
+  }
+
+  final eventsList = deduped.values.toList();
+  eventsList.sort((first, second) => first.date.compareTo(second.date));
+  return eventsList;
+}
+
+final eventsByCategoryProvider = Provider<Map<String, List<EventModel>>>((ref) {
+  final events = ref.watch(eventsNotifierProvider).value ?? const <EventModel>[];
+  return groupEventsByCategory(dedupeEventsByLocation(events));
+});
+
+final eventCategoriesProvider = Provider<List<String>>((ref) {
+  final categories = ref.watch(eventsByCategoryProvider).keys.toList()..sort();
+  return categories;
+});
+
 /// An AsyncNotifier that fetches events based on the current query.
 class EventsNotifier extends AsyncNotifier<List<EventModel>> {
+  // A session-wide cache of all events encountered so far
+  static final Map<String, EventModel> _allEventsCache = {};
+
+  static EventModel? getEvent(String id) => _allEventsCache[id];
+
   @override
   Future<List<EventModel>> build() async {
     final query = ref.watch(eventsQueryProvider);
     final apiService = ref.read(eventApiServiceProvider);
 
-    return apiService.fetchEvents(
+    final results = await apiService.fetchEvents(
       city: query.city,
       country: query.country,
       lat: query.lat,
@@ -120,6 +200,15 @@ class EventsNotifier extends AsyncNotifier<List<EventModel>> {
       keyword: query.keyword,
       classificationName: query.category,
     );
+
+    // Update session cache
+    for (var event in results) {
+      for (final key in event.lookupIds) {
+        _allEventsCache[key] = event;
+      }
+    }
+
+    return results;
   }
 
   /// Manually trigger a refresh.

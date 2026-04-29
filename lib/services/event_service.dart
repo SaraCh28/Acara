@@ -12,10 +12,18 @@ final eventServiceProvider = Provider((ref) => EventService());
 
 /// Simple provider that returns all currently fetched events.
 final eventsProvider = Provider<List<EventModel>>((ref) {
-  return ref.watch(eventsNotifierProvider).maybeWhen(
-        data: (events) => events,
-        orElse: () => [],
-      );
+  final asyncEvents = ref.watch(eventsNotifierProvider);
+  return asyncEvents.value ?? [];
+});
+
+/// Returns a specific event by ID, searching the current list and the session cache.
+final eventByIdProvider = Provider.family<EventModel?, String>((ref, id) {
+  final allEvents = ref.watch(eventsProvider);
+  final matches = allEvents.where((e) => e.lookupIds.contains(id));
+  if (matches.isNotEmpty) return matches.first;
+  
+  // Fallback to session cache
+  return EventsNotifier.getEvent(id);
 });
 
 /// Legacy city filter provider.
@@ -36,7 +44,7 @@ final locationInterestEventsProvider =
       final matchInterest = args.interests.isEmpty ||
           args.interests
               .map((i) => i.toLowerCase())
-              .contains(e.category.toLowerCase());
+              .contains(EventModel.normalizeCategory(e.category).toLowerCase());
       return matchCity && matchInterest;
     }).toList();
   },

@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../services/event_service.dart';
+import '../../../models/event_model.dart';
+import '../../../services/checkout_service.dart';
 import '../../../services/booking_service.dart';
+import '../../../services/event_service.dart';
 import 'package:intl/intl.dart';
 
 class ViewTicketScreen extends ConsumerWidget {
   final String bookingId;
-  const ViewTicketScreen({super.key, required this.bookingId});
+  final EventModel? initialEvent;
+  const ViewTicketScreen({super.key, required this.bookingId, this.initialEvent});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,11 +29,7 @@ class ViewTicketScreen extends ConsumerWidget {
       );
     }
 
-    final allEvents = ref.watch(eventsProvider);
-    final event = allEvents.cast<dynamic>().firstWhere(
-      (e) => e?.id == booking.eventId,
-      orElse: () => null,
-    );
+    final event = initialEvent ?? ref.watch(eventByIdProvider(booking.eventId)) ?? ref.watch(checkoutEventProvider);
 
     if (event == null) {
       return Scaffold(

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../models/event_model.dart';
 import '../../../services/event_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/auth_service.dart';
@@ -36,7 +35,6 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
     final allBookings = ref.watch(userBookingsProvider);
-    final allEvents = ref.watch(eventsProvider);
 
     if (currentUser == null) {
       return Scaffold(
@@ -53,18 +51,12 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
     // Separate into upcoming and past
     final now = DateTime.now();
     final upcomingBookings = userBookings.where((booking) {
-      final event = allEvents.cast<dynamic?>().firstWhere(
-        (e) => e?.id == booking.eventId,
-        orElse: () => null,
-      );
+      final event = ref.read(eventByIdProvider(booking.eventId));
       return event != null && event.date.isAfter(now);
     }).toList();
 
     final pastBookings = userBookings.where((booking) {
-      final event = allEvents.cast<dynamic?>().firstWhere(
-        (e) => e?.id == booking.eventId,
-        orElse: () => null,
-      );
+      final event = ref.read(eventByIdProvider(booking.eventId));
       return event != null && !event.date.isAfter(now);
     }).toList();
 
@@ -84,14 +76,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildBookingList(upcomingBookings, allEvents),
-          _buildBookingList(pastBookings, allEvents),
+          _buildBookingList(upcomingBookings),
+          _buildBookingList(pastBookings),
         ],
       ),
     );
   }
 
-  Widget _buildBookingList(List<dynamic> bookings, List<EventModel> events) {
+  Widget _buildBookingList(List<dynamic> bookings) {
     if (bookings.isEmpty) {
       return Center(
         child: Text(
@@ -107,10 +99,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
       itemCount: bookings.length,
       itemBuilder: (context, index) {
         final booking = bookings[index];
-        final event = events.cast<dynamic?>().firstWhere(
-          (e) => e?.id == booking.eventId,
-          orElse: () => null,
-        );
+        final event = ref.read(eventByIdProvider(booking.eventId));
 
         if (event == null) return const SizedBox.shrink();
 
@@ -172,7 +161,10 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
                       ),
                     ],
                   ),
-                  onTap: () => context.push('/view_ticket/${booking.id}'),
+                  onTap: () => context.pushNamed(
+                    'view_ticket',
+                    pathParameters: {'id': booking.id},
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -180,8 +172,10 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () =>
-                          context.push('/view_ticket/${booking.id}'),
+                      onPressed: () => context.pushNamed(
+                        'view_ticket',
+                        pathParameters: {'id': booking.id},
+                      ),
                       child: const Text('View Ticket'),
                     ),
                   ),

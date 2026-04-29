@@ -33,7 +33,10 @@ export class GooglePlacesAdapter implements IAdapter {
       }
       
       return data.results.map((place: any): EventModel => ({
-        id: place.place_id,
+        id: `google-places-${place.place_id}`,
+        legacyId: String(place.place_id),
+        sourceId: "google_places",
+        sourceName: "Google Places",
         title: place.name || "Local Event Site",
         description: place.formatted_address || "No description available",
         category: "Local Site",

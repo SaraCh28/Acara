@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/event_model.dart';
@@ -20,8 +19,8 @@ class EventApiService {
       final response = await _supabase.functions.invoke(
         'get-events',
         body: {
-          'city': city ?? 'Lahore',
-          'country': country ?? 'PK',
+          'city': city,
+          'country': country,
           'lat': lat,
           'lng': lng,
           'keyword': keyword,
@@ -29,20 +28,23 @@ class EventApiService {
         },
       );
 
-      if (response.status != 200) {
-        final errorDetails = response.data is Map ? (response.data as Map)['details'] ?? '' : '';
-        print('Backend error (${response.status}): $errorDetails');
-        throw Exception('Failed to fetch events: ${response.status} $errorDetails');
+      final dynamic rawData = response.data;
+      if (rawData is Map && rawData.containsKey('error')) {
+        final msg = rawData['details'] ?? rawData['error'];
+        throw Exception('Backend Error: $msg');
       }
 
-      final List<dynamic> data = response.data;
+      if (rawData == null || rawData is! List) {
+        print('Backend returned unexpected data format: $rawData');
+        return [];
+      }
+      
+      final List<dynamic> data = rawData;
       return data
           .map((json) => EventModel.fromJson(_normalizeJson(json as Map<String, dynamic>)))
           .toList();
     } catch (e) {
       print('Error calling get-events function: $e');
-      // If edge function fails, we return empty list to avoid UI crash, 
-      // but the error is now logged more clearly.
       return [];
     }
   }
@@ -50,8 +52,13 @@ class EventApiService {
   Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
     // Ensure all required fields for EventModel.fromJson are present
     // EventModel.fromJson expects 'id', 'title', 'description', etc.
+    final sourceId = json['sourceId'] ?? json['organizerId'] ?? 'ticketmaster';
+    final sourceName = json['sourceName'] ?? json['organizerName'] ?? 'Ticketmaster';
     return {
       'id': json['id'] ?? '',
+      'legacyId': json['legacyId'] ?? json['sourceEventId'] ?? json['id'] ?? '',
+      'sourceId': sourceId,
+      'sourceName': sourceName,
       'title': json['title'] ?? 'Unknown Event',
       'description': json['description'] ?? 'No description available.',
       'category': json['category'] ?? 'General',
@@ -65,8 +72,8 @@ class EventApiService {
       'country': json['country'] ?? 'TBA',
       'price': (json['price'] as num?)?.toDouble() ?? 0.0,
       'imageUrl': json['imageUrl'] ?? '',
-      'organizerId': json['organizerId'] ?? 'tm',
-      'organizerName': json['organizerName'] ?? 'Ticketmaster',
+      'organizerId': json['organizerId'] ?? sourceId,
+      'organizerName': json['organizerName'] ?? sourceName,
       'attendeeCount': (json['attendeeCount'] as num?)?.toInt() ?? 0,
       'created_at': json['created_at'] ?? DateTime.now().toIso8601String(),
     };

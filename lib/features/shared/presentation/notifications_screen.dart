@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/event_model.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/event_service.dart';
@@ -24,7 +25,7 @@ class NotificationsScreen extends ConsumerWidget {
         _NotificationItem(
           title: 'New events match your interests',
           subtitle:
-              'We found ${events.where((event) => user!.interests.contains(event.category)).length} events across ${user!.interests.take(3).join(', ')}.',
+              'We found ${events.where((event) => user!.interests.map(EventModel.normalizeCategory).contains(EventModel.normalizeCategory(event.category))).length} events across ${user!.interests.take(3).join(', ')}.',
           icon: Icons.auto_awesome,
           color: AppColors.primary,
         ),

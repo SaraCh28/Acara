@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/bookmark_service.dart';
+import '../../../services/app_preferences_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -28,168 +29,208 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('MEMBERSHIP'),
-        centerTitle: true,
+        title: const Text('Profile'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => context.push('/name_selection'),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 32),
+            const SizedBox(height: AppConstants.paddingLarge),
             Center(
               child: Column(
                 children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: [AppColors.primary, AppColors.accent]),
-                        ),
-                        child: CircleAvatar(
-                          radius: 54,
-                          backgroundColor: AppColors.surface,
-                          backgroundImage: user.profileImageUrl != null
-                              ? AssetImage(user.profileImageUrl!)
-                              : null,
-                          child: user.profileImageUrl == null
-                              ? const Icon(Icons.person, size: 54, color: Colors.white24)
-                              : null,
-                        ),
-                      ),
-                      Positioned(
-                        right: 4,
-                        bottom: 4,
-                        child: GestureDetector(
-                          onTap: () => context.push('/name_selection'),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: AppColors.accent,
-                              shape: BoxShape.circle,
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.primaryLight,
+                    backgroundImage: user.profileImageUrl != null
+                        ? AssetImage(user.profileImageUrl!)
+                        : null,
+                    child: user.profileImageUrl == null
+                        ? Text(
+                            user.name.isNotEmpty
+                                ? user.name.substring(0, 1).toUpperCase()
+                                : 'U',
+                            style: const TextStyle(
+                              fontSize: 40,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                            child: const Icon(Icons.edit, size: 14, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    ],
+                          )
+                        : null,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppConstants.paddingMedium),
                   Text(
                     user.name,
-                    style: Theme.of(context).textTheme.displaySmall,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    user.email.toUpperCase(),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: AppColors.textHint,
-                      letterSpacing: 2,
+                    user.email,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 40),
-            
+            const SizedBox(height: 32),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingLarge,
+              ),
               child: Row(
                 children: [
-                   Expanded(child: _StatCard(label: 'EXPERIENCES', value: '$bookingCount')),
-                   const SizedBox(width: 16),
-                   Expanded(child: _StatCard(label: 'WISHLIST', value: '$bookmarkCount')),
+                  Expanded(
+                    child: _StatCard(label: 'Bookings', value: '$bookingCount'),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(label: 'Saved', value: '$bookmarkCount'),
+                  ),
                 ],
               ),
             ),
-            
-            const SizedBox(height: 40),
-            
-            // MENU ITEMS
+            const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingLarge,
+              ),
               child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppConstants.paddingLarge),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white10),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.confirmation_number_outlined,
-                      title: 'My Reservations',
-                      onTap: () => context.push('/profile/bookings'),
+                    Text(
+                      'Interests',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.interests_outlined,
-                      title: 'Tailored Preferences',
-                      onTap: () => context.push('/interests'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: user.interests.isEmpty
+                          ? [const Text('No interests selected yet')]
+                          : user.interests
+                                .map((interest) => Chip(label: Text(interest)))
+                                .toList(),
                     ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.security_outlined,
-                      title: 'Security & Access',
-                      onTap: () => context.push('/profile/settings'),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Location',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      user.city == null
+                          ? 'Not set'
+                          : '${user.city}, ${user.country}',
                     ),
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
-            
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildMenuItem(
-                context,
-                icon: Icons.logout_rounded,
-                title: 'Sign Out',
-                isCenter: true,
-                textColor: Colors.redAccent.withValues(alpha: 0.8),
-                onTap: () async {
-                  await ref.read(currentUserProvider.notifier).logout();
-                  if (context.mounted) context.go('/login');
-                },
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingLarge,
+              ),
+              child: Column(
+                children: [
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.calendar_month_outlined,
+                    title: 'My Bookings',
+                    onTap: () => context.push('/profile/bookings'),
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.payment_outlined,
+                    title: 'Payment Methods',
+                    onTap: () => context.push('/profile/payments'),
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.favorite_border,
+                    title: 'Interests & Preferences',
+                    onTap: () => context.push('/interests'),
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.settings_outlined,
+                    title: 'Settings',
+                    onTap: () => context.push('/profile/settings'),
+                  ),
+                  const SizedBox(height: 8),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final prefs = ref.watch(appPreferencesProvider);
+                      return SwitchListTile(
+                        value: prefs.isDarkMode,
+                        onChanged: (value) => ref.read(appPreferencesProvider.notifier).toggleDarkMode(),
+                        title: const Text('Dark Mode'),
+                        secondary: Icon(
+                          prefs.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                          color: AppColors.primary,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.paddingLarge),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.logout_outlined,
+                    title: 'Logout',
+                    textColor: Colors.red,
+                    iconColor: Colors.red,
+                    onTap: () async {
+                      await ref.read(currentUserProvider.notifier).logout();
+                      if (context.mounted) {
+                        context.go('/login');
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 60),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDivider() => const Divider(height: 1, color: Colors.white10, indent: 60);
-
   Widget _buildMenuItem(
     BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    bool isCenter = false,
     Color? textColor,
+    Color? iconColor,
   }) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Icon(icon, color: textColor ?? AppColors.accent, size: 22),
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: iconColor ?? AppColors.textPrimary),
       title: Text(
         title,
         style: TextStyle(
-          color: textColor ?? Colors.white,
-          fontSize: 15,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
-          letterSpacing: 0.5,
+          color: textColor ?? AppColors.textPrimary,
         ),
       ),
-      trailing: isCenter ? null : const Icon(Icons.arrow_forward_ios, color: Colors.white12, size: 14),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
       onTap: onTap,
     );
   }
@@ -197,32 +238,23 @@ class ProfileScreen extends ConsumerWidget {
 
 class _StatCard extends StatelessWidget {
   const _StatCard({required this.label, required this.value});
+
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white10),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Text(
-            value,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(color: AppColors.accent),
-          ),
+          Text(value, style: Theme.of(context).textTheme.displaySmall),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white38,
-              letterSpacing: 1.5,
-            ),
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );

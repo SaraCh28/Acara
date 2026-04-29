@@ -9,5 +9,5 @@ class AppConstants {
   static const double paddingXLarge = 32.0;
 
   static const String appName = 'Acara';
-  static const String fontFamily = 'Poppins';
+  static const String fontFamily = 'Plus Jakarta Sans';
 }

@@ -137,13 +137,22 @@ class AuthService {
         throw const AuthException('Signup failed: Could not create user account');
       }
 
-      return UserModel(
-        id: response.user!.id,
-        name: name ?? 'User',
-        email: email.trim(),
-        joinedAt: DateTime.now(),
-      );
+      // We wait a bit for the trigger to create the profile, then fetch it.
+      // If we return just a default UserModel, other parts of the app might fail if they expect a profile row.
+      try {
+        return await _fetchProfile(response.user!.id, response.user!.email!);
+      } catch (e) {
+        // Fallback if fetch fails immediately after signup
+        return UserModel(
+          id: response.user!.id,
+          name: name ?? email.split('@').first,
+          email: email.trim(),
+          joinedAt: DateTime.now(),
+          profileImageUrl: 'assets/avatars/avatar_0.png',
+        );
+      }
     } catch (e) {
+      if (e is AuthException) rethrow;
       throw AuthException(e.toString());
     }
   }
@@ -182,10 +191,16 @@ class AuthService {
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
         };
-        await _supabase.from('profiles').insert(newProfile);
+        // Use upsert to be safe against race conditions with the trigger
+        await _supabase.from('profiles').upsert(newProfile);
         data = newProfile;
       } catch (e) {
-        throw const AuthException('User profile not found and could not be created. Please try again.');
+        // If upsert fails, try one last fetch in case the trigger just finished
+        try {
+          data = await _supabase.from('profiles').select().eq('id', id).single();
+        } catch (_) {
+          throw const AuthException('User profile could not be initialized. Please check your internet connection and try again.');
+        }
       }
     }
     

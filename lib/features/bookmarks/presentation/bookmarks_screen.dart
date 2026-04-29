@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/bookmark_model.dart';
-import '../../../services/event_service.dart';
 import '../../../services/bookmark_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../widgets/event_card.dart';
+import '../../../services/events_cache_notifier.dart';
 
 class BookmarksScreen extends ConsumerStatefulWidget {
   const BookmarksScreen({super.key});
@@ -40,9 +40,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
         .watch(userBookmarksProvider)
         .where((bookmark) => user != null && bookmark.userId == user.id)
         .toList();
-    final eventsById = {
-      for (final event in ref.watch(eventsProvider)) event.id: event,
-    };
+    final eventsById = ref.watch(eventsCacheProvider);
 
     final upcomingEvents = bookmarkedEvents.where((bookmark) {
       final event = eventsById[bookmark.eventId];
@@ -101,13 +99,11 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
       );
     }
 
-    final allEvents = ref.watch(eventsProvider);
+    final allEventsMap = ref.watch(eventsCacheProvider);
     final grouped = <String, List<BookmarkModel>>{};
 
     for (final bookmark in bookmarks) {
-      final event = allEvents
-          .where((item) => item.id == bookmark.eventId)
-          .firstOrNull;
+      final event = allEventsMap[bookmark.eventId];
       if (event == null) {
         continue;
       }
@@ -123,9 +119,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
       itemBuilder: (context, index) {
         final key = keys[index];
         final sectionBookmarks = grouped[key]!;
-        final firstEvent = allEvents.firstWhere(
-          (event) => event.id == sectionBookmarks.first.eventId,
-        );
+        final firstEvent = allEventsMap[sectionBookmarks.first.eventId]!;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,9 +134,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
               ),
             ),
             ...sectionBookmarks.map((bookmark) {
-              final event = allEvents.firstWhere(
-                (item) => item.id == bookmark.eventId,
-              );
+              final event = allEventsMap[bookmark.eventId]!;
               return Padding(
                 padding: const EdgeInsets.only(
                   bottom: AppConstants.paddingMedium,
@@ -164,7 +156,11 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen>
                     if (currentUser != null) {
                       ref
                           .read(userBookmarksProvider.notifier)
-                          .toggleBookmark(currentUser.id, event.id);
+                            .toggleBookmark(
+                              currentUser.id,
+                              event.id,
+                              alternateEventIds: event.lookupIds.skip(1),
+                            );
                     }
                   },
                   child: EventCard(

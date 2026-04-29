@@ -13,6 +13,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+
 Deno.serve(async (req: Request) => {
   // Handle CORS Preflight
   if (req.method === "OPTIONS") {
@@ -32,8 +33,8 @@ Deno.serve(async (req: Request) => {
       console.warn("Could not parse request body, using empty params:", e.message);
     }
 
-    const city = requestData.city || "Lahore";
-    const country = requestData.country || "PK";
+    const city = requestData.city;
+    const country = requestData.country;
     const keyword = requestData.keyword?.trim() || "";
     const lat = requestData.lat;
     const lng = requestData.lng;
@@ -49,6 +50,9 @@ Deno.serve(async (req: Request) => {
 
       const diagnosticEvent = {
         id: "diag-123",
+        legacyId: "diag-123",
+        sourceId: "system",
+        sourceName: "Acara Diagnostics",
         title: "Diagnostic Test Event",
         description: missingKeys.length > 0 
           ? `SUCCESS: Pipeline is OK, but these API keys are MISSING: ${missingKeys.join(", ")}`
@@ -79,9 +83,9 @@ Deno.serve(async (req: Request) => {
     const { data: cachedData, error: cacheError } = await supabase
       .from("cached_events")
       .select("data")
-      .eq("city", city.toLowerCase())
-      .eq("country", country.toUpperCase())
-      .eq("keyword", keyword.toLowerCase())
+      .eq("city", (city || "").toLowerCase())
+      .eq("country", (country || "").toUpperCase())
+      .eq("keyword", (keyword || "").toLowerCase())
       .gt("created_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()) 
       .maybeSingle();
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/branded_logo.dart';
 import '../../../services/app_preferences_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,25 +21,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> onboardingData = [
     {
-      'title': 'Curated Elite Events',
+      'title': 'Discover events near you',
       'text':
-          'Access a handpicked selection of the most exclusive concerts, galas, and cultural events.',
+          'Explore concerts, art nights, and local gatherings matched to your city.',
       "image":
-          "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=1000&q=80",
+          "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80",
     },
     {
-      'title': 'Intelligent Discovery',
+      'title': 'Build a personalized feed',
       'text':
-          'Our AI understands your refined tastes and suggests experiences that truly resonate.',
+          'Choose what you care about and get recommendations that improve over time.',
       "image":
-          "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=80",
+          "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
     },
     {
-      'title': 'Seamless Reservations',
+      'title': 'Book tickets in minutes',
       'text':
-          'Secure your presence at the world\'s most sought-after gatherings with a single touch.',
+          'Pick ticket types, pay securely, and keep every booking in one place.',
       "image":
-          "https://images.unsplash.com/photo-1505373633560-82d27e25946c?auto=format&fit=crop&w=1000&q=80",
+          "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
     },
   ];
 
@@ -52,7 +54,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           PageView.builder(
@@ -69,75 +70,85 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               text: onboardingData[index]["text"]!,
             ),
           ),
-          
-          // Custom Gradient Overlay for Luxe feel
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.1),
-                      Colors.transparent,
-                      AppColors.background.withValues(alpha: 0.9),
-                      AppColors.background,
-                    ],
-                    stops: const [0.0, 0.4, 0.7, 0.9],
-                  ),
-                ),
-              ),
-            ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: AppConstants.paddingLarge,
+            child: const BrandedLogo(
+              size: 46,
+              showWordmark: false,
+            ).animate().fadeIn(duration: 350.ms),
           ),
-
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             right: AppConstants.paddingLarge,
             child: TextButton(
               onPressed: _finishOnboarding,
-              child: const Text('SKIP'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.14),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.35)),
+                ),
+              ),
+              child: const Text(
+                'Skip',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           Positioned(
-            bottom: 60,
-            left: 32,
-            right: 32,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    onboardingData.length,
-                    (index) => buildDot(index: index),
+            bottom: 18,
+            left: AppConstants.paddingLarge,
+            right: AppConstants.paddingLarge,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
-                ),
-                const SizedBox(height: 48),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_currentPage == onboardingData.length - 1) {
-                      _finishOnboarding();
-                    } else {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.easeInOutCubic,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    minimumSize: const Size(double.infinity, 64),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: List.generate(
+                      onboardingData.length,
+                      (index) => buildDot(index: index),
                     ),
                   ),
-                  child: Text(
-                    _currentPage == onboardingData.length - 1
-                        ? "ENTER ACARA"
-                        : "CONTINUE",
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_currentPage == onboardingData.length - 1) {
+                        _finishOnboarding();
+                      } else {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(132, 52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      _currentPage == onboardingData.length - 1
+                          ? 'Get Started'
+                          : 'Next',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -145,16 +156,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget buildDot({required int index}) {
+  AnimatedContainer buildDot({required int index}) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(right: 6),
-      height: 4,
-      width: _currentPage == index ? 32 : 12,
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.only(right: 8),
+      height: 8,
+      width: _currentPage == index ? 24 : 8,
       decoration: BoxDecoration(
         color: _currentPage == index
-            ? AppColors.accent
-            : Colors.white.withValues(alpha: 0.2),
+            ? AppColors.primary
+            : AppColors.primaryLight.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -174,42 +185,84 @@ class OnboardingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Expanded(
-          flex: 4,
+    return Stack(
+      children: [
+        Positioned.fill(
           child: Image.network(
             image,
             fit: BoxFit.cover,
             width: double.infinity,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+                child: const Center(
+                  child: Icon(Icons.image_not_supported_rounded, color: Colors.white, size: 64),
+                ),
+              );
+            },
           ),
         ),
-        Expanded(
-          flex: 3,
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.08),
+                  Colors.black.withValues(alpha: 0.48),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                Text(
-                  title, 
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    letterSpacing: -1,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  text, 
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 88),
+            padding: const EdgeInsets.all(AppConstants.paddingLarge),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
               ],
             ),
-          ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        height: 1.45,
+                      ),
+                ),
+              ],
+            ),
+          ).animate().fadeIn(duration: 380.ms).slideY(begin: 0.08),
         ),
       ],
     );

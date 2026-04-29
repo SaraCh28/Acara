@@ -7,6 +7,8 @@ import 'core/router/app_router.dart';
 import 'core/config/env_config.dart';
 import 'core/widgets/error_boundary.dart';
 import 'services/app_preferences_service.dart';
+import 'services/auth_service.dart';
+import 'package:go_router/go_router.dart';
 
 class SecureAuthStorage extends LocalStorage {
   final _storage = const FlutterSecureStorage();
@@ -87,6 +89,41 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: prefs.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       routerConfig: router,
+      builder: (context, child) {
+        return AuthListener(child: child!);
+      },
     );
+  }
+}
+
+class AuthListener extends ConsumerStatefulWidget {
+  final Widget child;
+  const AuthListener({super.key, required this.child});
+
+  @override
+  ConsumerState<AuthListener> createState() => _AuthListenerState();
+}
+
+class _AuthListenerState extends ConsumerState<AuthListener> {
+  @override
+  void initState() {
+    super.initState();
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.passwordRecovery) {
+        if (mounted) {
+          context.go('/reset_password');
+        }
+      } else if (data.event == AuthChangeEvent.signedOut) {
+        if (mounted) {
+          ref.read(currentUserProvider.notifier).logout();
+          context.go('/login');
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }

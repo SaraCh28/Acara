@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/event_model.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/payment_service.dart';
 import '../../../services/event_service.dart';
@@ -11,7 +12,8 @@ import '../../../services/booking_service.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   final String eventId;
-  const PaymentScreen({super.key, required this.eventId});
+  final EventModel? initialEvent;
+  const PaymentScreen({super.key, required this.eventId, this.initialEvent});
 
   @override
   ConsumerState<PaymentScreen> createState() => _PaymentScreenState();
@@ -26,9 +28,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final draft = ref.watch(checkoutDraftProvider);
     final paymentMethods = ref.watch(paymentMethodsProvider);
     final currentUser = ref.watch(currentUserProvider);
-    final event = ref
-        .watch(eventsProvider)
-        .firstWhere((e) => e.id == widget.eventId);
+    final checkoutEvent = ref.watch(checkoutEventProvider);
+    final event = widget.initialEvent ?? ref.watch(eventByIdProvider(widget.eventId)) ?? checkoutEvent;
+
+    if (checkoutEvent == null && event != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(checkoutEventProvider.notifier).setEvent(event);
+        }
+      });
+    }
+
+    if (event == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Payment')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     if (draft == null) {
       return Scaffold(
@@ -152,7 +168,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             const SizedBox(height: AppConstants.paddingLarge),
             ElevatedButton(
               onPressed: _selectedPaymentMethodId != null && !_isLoading
-                  ? () => _processPayment(ref, currentUser?.id)
+                  ? () => _processPayment(ref, currentUser?.id, event)
                   : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -174,7 +190,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  Future<void> _processPayment(WidgetRef ref, String? userId) async {
+  Future<void> _processPayment(WidgetRef ref, String? userId, EventModel event) async {
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please log in to continue')),
@@ -208,7 +224,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
       if (mounted) {
         // Navigate to confirmation with booking ID
-        context.go('/booking_confirmation/${booking.id}');
+        context.goNamed(
+          'booking_confirmation',
+          pathParameters: {'id': booking.id},
+          extra: event,
+        );
       }
     } catch (e) {
       if (mounted) {

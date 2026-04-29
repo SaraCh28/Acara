@@ -41,8 +41,20 @@ class UserBookmarksNotifier extends Notifier<List<BookmarkModel>> {
     }
   }
 
-  Future<void> toggleBookmark(String userId, String eventId) async {
-    final isBookmarkedCurrently = isBookmarked(userId, eventId);
+  Future<void> toggleBookmark(
+    String userId,
+    String eventId, {
+    Iterable<String> alternateEventIds = const [],
+  }) async {
+    final eventIds = {
+      eventId,
+      ...alternateEventIds.where((id) => id.isNotEmpty),
+    };
+    final isBookmarkedCurrently = isBookmarked(
+      userId,
+      eventId,
+      alternateEventIds: alternateEventIds,
+    );
 
     try {
       if (isBookmarkedCurrently) {
@@ -51,10 +63,12 @@ class UserBookmarksNotifier extends Notifier<List<BookmarkModel>> {
             .from('bookmarks')
             .delete()
             .eq('user_id', userId)
-            .eq('event_id', eventId);
+            .or(eventIds.map((id) => 'event_id.eq.$id').join(','));
 
         // Update local state
-        state = state.where((b) => b.eventId != eventId).toList();
+        state = state
+            .where((b) => !eventIds.contains(b.eventId))
+            .toList();
       } else {
         // Add bookmark to Supabase
         final response = await _supabase.from('bookmarks').insert({
@@ -72,9 +86,18 @@ class UserBookmarksNotifier extends Notifier<List<BookmarkModel>> {
     }
   }
 
-  bool isBookmarked(String userId, String eventId) {
+  bool isBookmarked(
+    String userId,
+    String eventId, {
+    Iterable<String> alternateEventIds = const [],
+  }) {
+    final eventIds = {
+      eventId,
+      ...alternateEventIds.where((id) => id.isNotEmpty),
+    };
     return state.any(
-      (bookmark) => bookmark.userId == userId && bookmark.eventId == eventId,
+      (bookmark) =>
+          bookmark.userId == userId && eventIds.contains(bookmark.eventId),
     );
   }
 }

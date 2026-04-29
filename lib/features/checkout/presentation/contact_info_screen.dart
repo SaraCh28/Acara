@@ -4,12 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/event_model.dart';
+import '../../../services/event_service.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/auth_service.dart';
 
 class ContactInfoScreen extends ConsumerStatefulWidget {
   final String eventId;
-  const ContactInfoScreen({super.key, required this.eventId});
+  final EventModel? initialEvent;
+  const ContactInfoScreen({super.key, required this.eventId, this.initialEvent});
 
   @override
   ConsumerState<ContactInfoScreen> createState() => _ContactInfoScreenState();
@@ -44,6 +47,7 @@ class _ContactInfoScreenState extends ConsumerState<ContactInfoScreen> {
     if (_formKey.currentState!.validate()) {
       final draft = ref.read(checkoutDraftProvider);
       if (draft != null) {
+        final event = widget.initialEvent ?? ref.read(checkoutEventProvider) ?? ref.read(eventByIdProvider(widget.eventId));
         ref.read(checkoutDraftProvider.notifier).saveDraft(
           draft.copyWith(
             bookerName: _nameController.text.trim(),
@@ -51,13 +55,28 @@ class _ContactInfoScreenState extends ConsumerState<ContactInfoScreen> {
             bookerPhone: _phoneController.text.trim(),
           ),
         );
-        context.push('/payment_selection/${widget.eventId}');
+        context.pushNamed(
+          'payment_selection',
+          pathParameters: {'id': widget.eventId},
+          extra: event,
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final checkoutEvent = ref.watch(checkoutEventProvider);
+    final event = widget.initialEvent ?? checkoutEvent;
+
+    if (checkoutEvent == null && event != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(checkoutEventProvider.notifier).setEvent(event);
+        }
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Contact Information')),
       body: SingleChildScrollView(
@@ -67,6 +86,13 @@ class _ContactInfoScreenState extends ConsumerState<ContactInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (event != null) ...[
+                Text(
+                  event.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppConstants.paddingSmall),
+              ],
               Text(
                 'Where should we send your tickets?',
                 style: Theme.of(context).textTheme.headlineSmall,

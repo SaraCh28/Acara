@@ -1,5 +1,8 @@
 export interface EventModel {
   id: string;
+  legacyId: string;
+  sourceId: string;
+  sourceName: string;
   title: string;
   description: string;
   category: string;

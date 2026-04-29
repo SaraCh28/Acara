@@ -11,7 +11,6 @@ export class EventAggregatorService {
   private googlePlaces = new GooglePlacesAdapter();
   private localSource = new LocalEventsAdapter();
   private seatgeek = new SeatGeekAdapter();
-
   async getEvents(city: string, country: string, keyword: string = "", lat?: number, lng?: number): Promise<EventModel[]> {
     // Tier 1: Try specific city search
     let events = await this._performSearch(city, country, keyword, lat, lng);
@@ -26,8 +25,10 @@ export class EventAggregatorService {
     return events;
   }
 
-  private async _performSearch(city: string, country: string, keyword: string = "", lat?: number, lng?: number): Promise<EventModel[]> {
-    let normalizedCountry = (country || "PK").toUpperCase();
+
+  private async _performSearch(city: string, countryCode: string, keyword: string = "", lat?: number, lng?: number): Promise<EventModel[]> {
+    let normalizedCountry = (countryCode || "").toUpperCase();
+    console.log(`[Aggregator] _performSearch: city="${city}", country="${normalizedCountry}", keyword="${keyword}", coords=${lat},${lng}`);
     let allEvents: EventModel[] = [];
 
     // Search with country code
@@ -43,43 +44,51 @@ export class EventAggregatorService {
   }
 
   private async _actuallyPerformSearch(city: string, country: string, keyword: string = "", lat?: number, lng?: number): Promise<EventModel[]> {
-    let allEvents: EventModel[] = [];
+    const adapters = [
+      { name: "Local", adapter: this.localSource },
+      { name: "Ticketmaster", adapter: this.ticketmaster },
+      { name: "Eventbrite", adapter: this.eventbrite },
+      { name: "SeatGeek", adapter: this.seatgeek },
+      { name: "GooglePlaces", adapter: this.googlePlaces },
+    ];
 
-    try {
-      // Priority 0: Local Manual Events (Always check these first for high-quality local results)
-      console.log(`[LocalSource] Searching ${city}, ${country}...`);
-      const localEvents = await this.localSource.fetchEvents(city, country, keyword, lat, lng);
-      console.log(`[LocalSource] Found ${localEvents.length} events.`);
-      if (localEvents.length > 0) allEvents = [...allEvents, ...localEvents];
+    console.log(`[Aggregator] Starting parallel search for "${keyword}" in ${city || "nearby"}, ${country}...`);
 
-      // Priority 1: Ticketmaster
-      console.log(`[Ticketmaster] Searching ${city}, ${country}...`);
-      const tmEvents = await this.ticketmaster.fetchEvents(city, country, keyword, lat, lng);
-      console.log(`[Ticketmaster] Found ${tmEvents.length} events.`);
-      if (tmEvents.length > 0) allEvents = [...allEvents, ...tmEvents];
+    // Helper to wrap adapter call with a timeout
+    const fetchWithTimeout = async (name: string, adapter: any) => {
+      const timeout = 6000; // 6 seconds timeout per adapter
+      const timer = new Promise<EventModel[]>((_, reject) => 
+        setTimeout(() => reject(new Error(`${name} timed out`)), timeout)
+      );
       
-      // Priority 2: Eventbrite
-      console.log(`[Eventbrite] Searching ${city}, ${country}...`);
-      const ebEvents = await this.eventbrite.fetchEvents(city, country, keyword, lat, lng);
-      console.log(`[Eventbrite] Found ${ebEvents.length} events.`);
-      if (ebEvents.length > 0) allEvents = [...allEvents, ...ebEvents];
-      
-      // Priority 3: SeatGeek
-      console.log(`[SeatGeek] Searching ${city}, ${country}...`);
-      const sgEvents = await this.seatgeek.fetchEvents(city, country, keyword, lat, lng);
-      console.log(`[SeatGeek] Found ${sgEvents.length} events.`);
-      if (sgEvents.length > 0) allEvents = [...allEvents, ...sgEvents];
+      try {
+        const result = await Promise.race([
+          adapter.fetchEvents(city, country, keyword, lat, lng),
+          timer
+        ]);
+        console.log(`[${name}] Found ${(result as EventModel[]).length} events.`);
+        return result as EventModel[];
+      } catch (err: any) {
+        console.error(`[${name}] Failed:`, err.message);
+        return [];
+      }
+    };
 
-      // Priority 4: Google Places (Useful for venues/local recurring events)
-      console.log(`[GooglePlaces] Searching ${city}, ${country}...`);
-      const gpEvents = await this.googlePlaces.fetchEvents(city, country, keyword, lat, lng);
-      console.log(`[GooglePlaces] Found ${gpEvents.length} events.`);
-      if (gpEvents.length > 0) allEvents = [...allEvents, ...gpEvents];
-
-      return allEvents;
-    } catch (error) {
-      console.error("Aggregator _performSearch error:", error);
-      return allEvents;
+    const results = await Promise.all(adapters.map(a => fetchWithTimeout(a.name, a.adapter)));
+    
+    // Flatten results and remove duplicates if any (by ID)
+    const allEvents = results.flat();
+    const uniqueEventsMap = new Map<string, EventModel>();
+    
+    for (const event of allEvents) {
+      if (!uniqueEventsMap.has(event.id)) {
+        uniqueEventsMap.set(event.id, event);
+      }
     }
+
+    const finalEvents = Array.from(uniqueEventsMap.values());
+    console.log(`[Aggregator] Total unique events found: ${finalEvents.length}`);
+    
+    return finalEvents;
   }
 }

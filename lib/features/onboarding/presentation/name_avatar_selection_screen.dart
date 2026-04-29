@@ -77,149 +77,142 @@ class _NameAvatarSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(currentUserProvider);
-    final bool isOnboarding = user?.name == null || user?.name == 'User' || user?.name == user?.email.split('@').first;
-
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        leading: isOnboarding 
-            ? null 
-            : IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                onPressed: () => context.pop(),
-              ),
-        title: Text(isOnboarding ? 'Profile Setup' : 'Edit Profile'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.all(AppConstants.paddingLarge),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                'Complete Your Profile',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Tell us your name and pick an avatar to represent you in the Acara community.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              const SizedBox(height: 40),
+              
+              // Name Input
+              Text(
+                'What should we call you?',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  hintText: 'Full Name',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // Avatar Selection
+              Text(
+                'Choose your avatar',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 20),
+              
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                ),
+                itemCount: _avatars.length,
+                itemBuilder: (context, index) {
+                  final avatar = _avatars[index];
+                  final isSelected = _selectedAvatar == avatar;
+                  
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedAvatar = avatar),
+                    child: Container(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.accent],
+                        border: Border.all(
+                          color: isSelected ? AppColors.primary : Colors.transparent,
+                          width: 4,
                         ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                )
+                              ]
+                            : null,
                       ),
                       child: CircleAvatar(
-                        radius: 64,
-                        backgroundColor: AppColors.surface,
-                        backgroundImage: _selectedAvatar != null 
-                            ? AssetImage(_selectedAvatar!) 
-                            : null,
-                        child: _selectedAvatar == null
-                            ? const Icon(Icons.person, size: 64, color: Colors.white24)
-                            : null,
+                        backgroundColor: isSelected 
+                            ? AppColors.primaryLight.withValues(alpha: 0.1) 
+                            : Colors.white,
+                        backgroundImage: AssetImage(avatar),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 48),
-                
-                // Name Input with Luxe border
-                TextField(
-                  controller: _nameController,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'Your Distinguished Name',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
-                    enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white10),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.accent),
-                    ),
-                    fillColor: Colors.transparent,
-                    filled: false,
-                  ),
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Avatar Selection Grid
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'SELECT AN AVATAR',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      letterSpacing: 2,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                  ),
-                  itemCount: _avatars.length,
-                  itemBuilder: (context, index) {
-                    final avatar = _avatars[index];
-                    final isSelected = _selectedAvatar == avatar;
-                    
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedAvatar = avatar),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected ? AppColors.accent : Colors.transparent,
-                            width: 2,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: AppColors.accent.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                  )
-                                ]
-                              : null,
-                        ),
-                        child: CircleAvatar(
-                          backgroundColor: AppColors.surface,
-                          backgroundImage: AssetImage(avatar),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                
-                const SizedBox(height: 48),
-                
-                ElevatedButton(
+                  );
+                },
+              ),
+              
+              const SizedBox(height: 60),
+              
+              // Continue Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                  ),
                   child: _isLoading
-                      ? const SizedBox(
-                          height: 20, 
-                          width: 20, 
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                        )
-                      : Text(isOnboarding ? 'ESTABLISH IDENTITY' : 'UPDATE IDENTITY'),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Continue',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
-                const SizedBox(height: 40),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
