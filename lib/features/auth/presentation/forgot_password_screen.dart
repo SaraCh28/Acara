@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../services/auth_service.dart';
+import '../../../core/widgets/app_input.dart';
+import '../../../core/widgets/app_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key, required this.authService});
@@ -77,31 +79,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppConstants.paddingLarge),
-                TextFormField(
+                AppInput(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    hintText: 'Email address',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                  validator: (value) {
-                    final email = value?.trim() ?? '';
-                    if (email.isEmpty || !email.contains('@')) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
-                  },
+                  hintText: 'Email address',
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
-                const Spacer(),
-                ElevatedButton(
+                const SizedBox(height: AppConstants.paddingLarge),
+                AppButton(
+                  label: 'Send Reset Link',
                   onPressed: _isSending ? null : _sendResetLink,
-                  child: _isSending
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Send Reset Link'),
+                  loading: _isSending,
+                  variant: AppButtonVariant.primary,
                 ),
               ],
             ),

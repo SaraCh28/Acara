@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
 class BrandedLogo extends StatelessWidget {
@@ -61,11 +61,10 @@ class BrandedLogo extends StatelessWidget {
               ),
               Text(
                 'A',
-                style: TextStyle(
+                style: GoogleFonts.playwriteNzGuides(
                   color: Colors.white,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w400,
                   fontSize: size * 0.42,
-                  letterSpacing: -1,
                 ),
               ),
             ],
@@ -74,11 +73,11 @@ class BrandedLogo extends StatelessWidget {
         if (showWordmark) ...[
           SizedBox(height: size * 0.22),
           Text(
-            'Acara',
-            style: textTheme.displaySmall?.copyWith(
+            'acara',
+            style: GoogleFonts.playwriteNzGuides(
               color: wordmarkColor,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+              fontWeight: FontWeight.w400,
+              fontSize: size * 0.32,
             ),
           ),
         ],

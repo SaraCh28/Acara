@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/branded_logo.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/auth_service.dart';
 
 class InterestSelectionScreen extends ConsumerStatefulWidget {
@@ -42,7 +43,7 @@ class _InterestSelectionScreenState
     });
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     if (_selectedInterests.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least 3 interests')),
@@ -50,10 +51,13 @@ class _InterestSelectionScreenState
       return;
     }
 
-    ref
+    await ref
         .read(currentUserProvider.notifier)
         .updateProfile(interests: _selectedInterests.toList());
-    context.go('/location_permission');
+    
+    if (mounted) {
+      context.go('/location_permission');
+    }
   }
 
   @override
@@ -142,15 +146,14 @@ class _InterestSelectionScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      ElevatedButton(
-                        onPressed: _selectedInterests.length >= 3 ? _continue : null,
-                        child: Text(
-                          _selectedInterests.length >= 3
-                              ? 'Continue'
-                              : 'Choose ${3 - _selectedInterests.length} more',
-                        ),
-                      ),
+                       const SizedBox(height: 14),
+                       AppButton(
+                         label: _selectedInterests.length >= 3
+                             ? 'Continue'
+                             : 'Choose ${3 - _selectedInterests.length} more',
+                         onPressed: _selectedInterests.length >= 3 ? _continue : null,
+                         variant: AppButtonVariant.primary,
+                       ),
                       const SizedBox(height: 8),
                       Center(
                         child: TextButton(

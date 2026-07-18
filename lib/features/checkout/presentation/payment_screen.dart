@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../models/event_model.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/payment_service.dart';
@@ -166,23 +167,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             ),
 
             const SizedBox(height: AppConstants.paddingLarge),
-            ElevatedButton(
+            AppButton(
+              label: 'Pay Now',
               onPressed: _selectedPaymentMethodId != null && !_isLoading
                   ? () => _processPayment(ref, currentUser?.id, event)
                   : null,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    )
-                  : const Text('Pay Now'),
+              loading: _isLoading,
+              variant: AppButtonVariant.primary,
             ),
           ],
         ),

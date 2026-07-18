@@ -114,7 +114,7 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
   final List<LinearGradient> defaultGradients = [
     AppColors.primaryGradient,
     AppColors.accentGradient,
-    AppColors.purpleBlueGradient,
+    AppColors.skyMistGradient,
   ];
 
   @override

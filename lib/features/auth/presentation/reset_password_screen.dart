@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_input.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/auth_service.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -72,49 +73,29 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               ),
               const SizedBox(height: 12),
               const Text('Enter a new password for your account.'),
-              const SizedBox(height: 40),
-              
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  hintText: 'New Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if ((value ?? '').length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppConstants.paddingMedium),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: const InputDecoration(
-                  hintText: 'Confirm New Password',
-                  prefixIcon: Icon(Icons.lock_reset_outlined),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 60),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _resetPassword,
-                  child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Update Password'),
-                ),
-              ),
+               const SizedBox(height: 40),
+
+               AppInput(
+                 controller: _passwordController,
+                 hintText: 'New Password',
+                 obscureText: true,
+                 prefixIcon: const Icon(Icons.lock_outline),
+               ),
+               const SizedBox(height: AppConstants.paddingMedium),
+               AppInput(
+                 controller: _confirmPasswordController,
+                 hintText: 'Confirm New Password',
+                 obscureText: true,
+                 prefixIcon: const Icon(Icons.lock_reset_outlined),
+               ),
+               const SizedBox(height: 60),
+
+               AppButton(
+                 label: 'Update Password',
+                 onPressed: _isLoading ? null : _resetPassword,
+                 loading: _isLoading,
+                 variant: AppButtonVariant.primary,
+               ),
             ],
           ),
         ),

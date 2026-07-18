@@ -147,7 +147,7 @@ class _AnimatedEventCardState extends State<AnimatedEventCard>
                               ? Icons.bookmark
                               : Icons.bookmark_border,
                           color: widget.isBookmarked
-                              ? AppColors.primary
+                              ? AppColors.accent
                               : AppColors.textPrimary,
                           size: 20,
                         ),
@@ -160,7 +160,7 @@ class _AnimatedEventCardState extends State<AnimatedEventCard>
                     left: 0,
                     right: 0,
                     child: Container(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

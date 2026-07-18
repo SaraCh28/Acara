@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/app_preferences_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/events_notifier.dart';
@@ -163,7 +164,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         setModalState(() => tempPriceRange = v),
                   ),
                   const SizedBox(height: AppConstants.paddingLarge),
-                  ElevatedButton(
+                  AppButton(
+                    label: 'Apply Filters',
                     onPressed: () {
                       setState(() {
                         _priceRange = tempPriceRange;
@@ -172,7 +174,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                       });
                       Navigator.pop(context);
                     },
-                    child: const Text('Apply Filters'),
+                    variant: AppButtonVariant.primary,
                   ),
                   const SizedBox(height: AppConstants.paddingLarge),
                 ],

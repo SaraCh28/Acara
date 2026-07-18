@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/event_service.dart';
 import '../../../services/checkout_service.dart';
 import '../../../models/checkout_draft_model.dart';
@@ -66,9 +67,10 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton(
+                AppButton(
+                  label: 'Go Back',
                   onPressed: () => context.pop(),
-                  child: const Text('Go Back'),
+                  variant: AppButtonVariant.secondary,
                 ),
               ],
             ),
@@ -85,7 +87,13 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(title: const Text('Select Tickets')),
+      appBar: AppBar(
+        title: const Text('Select Tickets'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -177,7 +185,8 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
+                  AppButton(
+                    label: 'Continue',
                     onPressed: (_vipCount + _regularCount) > 0
                         ? () {
                             final draft = CheckoutDraftModel(
@@ -196,7 +205,7 @@ class _TicketSelectionScreenState extends ConsumerState<TicketSelectionScreen> {
                             );
                           }
                         : null,
-                    child: const Text('Continue'),
+                    variant: AppButtonVariant.primary,
                   ),
                 ],
               ),

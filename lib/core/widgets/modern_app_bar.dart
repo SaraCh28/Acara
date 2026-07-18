@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
 class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -60,7 +61,9 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                   style: (title.toLowerCase() == 'acara' 
+                      ? GoogleFonts.playwriteNzGuides()
+                      : Theme.of(context).textTheme.headlineSmall)?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
@@ -133,7 +136,9 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: (title.toLowerCase() == 'acara'
+                    ? GoogleFonts.playwriteNzGuides()
+                    : Theme.of(context).textTheme.headlineSmall)?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
                 overflow: TextOverflow.ellipsis,

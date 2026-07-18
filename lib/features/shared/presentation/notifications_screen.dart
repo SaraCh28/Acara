@@ -32,7 +32,7 @@ class NotificationsScreen extends ConsumerWidget {
       if (bookings.isNotEmpty)
         _NotificationItem(
           title: 'Upcoming booking reminder',
-          subtitle: 'Your next booked event is ready in the Tickets tab.',
+          subtitle: 'Your next booked event is ready in your Profile.',
           icon: Icons.confirmation_number_outlined,
           color: AppColors.secondary,
         ),

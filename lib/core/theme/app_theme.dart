@@ -13,73 +13,73 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
-        surface: AppColors.surfaceWhite,
+        surface: AppColors.backgroundLight,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: GoogleFonts.inter(
+      textTheme: GoogleFonts.dmSansTextTheme().copyWith(
+        displayLarge: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w800,
           letterSpacing: -1.5,
           fontSize: 32,
         ),
-        displayMedium: GoogleFonts.inter(
+        displayMedium: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
           fontSize: 28,
         ),
-        displaySmall: GoogleFonts.inter(
+        displaySmall: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
           fontSize: 24,
         ),
-        headlineMedium: GoogleFonts.inter(
+        headlineMedium: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
           fontSize: 20,
         ),
-        headlineSmall: GoogleFonts.inter(
+        headlineSmall: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
           fontSize: 18,
         ),
-        titleLarge: GoogleFonts.inter(
+        titleLarge: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
           fontSize: 18,
         ),
-        titleMedium: GoogleFonts.inter(
+        titleMedium: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
-        titleSmall: GoogleFonts.inter(
+        titleSmall: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
           fontSize: 14,
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontSize: 16,
           letterSpacing: 0.2,
           fontWeight: FontWeight.w500,
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.dmSans(
           color: AppColors.textSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        bodySmall: GoogleFonts.inter(
+        bodySmall: GoogleFonts.dmSans(
           color: AppColors.textSecondary,
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
-        labelLarge: GoogleFonts.inter(
+        labelLarge: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
           fontSize: 14,
@@ -94,7 +94,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.dmSans(
             fontWeight: FontWeight.w700,
             fontSize: 16,
             letterSpacing: 0.5,
@@ -106,7 +106,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.dmSans(
             fontWeight: FontWeight.w700,
             fontSize: 14,
             letterSpacing: 0.3,
@@ -122,7 +122,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.dmSans(
             fontWeight: FontWeight.w700,
             fontSize: 16,
             letterSpacing: 0.5,
@@ -131,7 +131,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surfaceWhite,
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -156,11 +156,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.error, width: 2.5),
         ),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.dmSans(
           color: AppColors.textHint,
           fontWeight: FontWeight.w500,
         ),
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
         ),
@@ -182,7 +182,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.inter(
+        titleTextStyle: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontSize: 24,
           fontWeight: FontWeight.w800,
@@ -190,7 +190,8 @@ class AppTheme {
         ),
         scrolledUnderElevation: 0,
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceWhite,
         elevation: 16,
         selectedItemColor: AppColors.primary,
@@ -198,11 +199,11 @@ class AppTheme {
         showSelectedLabels: true,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: GoogleFonts.dmSans(
           fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: GoogleFonts.dmSans(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -235,7 +236,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceWhite,
         selectedColor: AppColors.primary,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.dmSans(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
         ),
@@ -263,36 +264,36 @@ class AppTheme {
         onSurface: AppColors.textLight,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.inter(
+      textTheme: GoogleFonts.dmSansTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontWeight: FontWeight.w800,
           letterSpacing: -1.5,
           fontSize: 32,
         ),
-        displayMedium: GoogleFonts.inter(
+        displayMedium: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
           fontSize: 28,
         ),
-        displaySmall: GoogleFonts.inter(
+        displaySmall: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontWeight: FontWeight.w700,
           fontSize: 24,
         ),
-        headlineMedium: GoogleFonts.inter(
+        headlineMedium: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontWeight: FontWeight.w700,
           fontSize: 20,
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontSize: 16,
           letterSpacing: 0.2,
           fontWeight: FontWeight.w500,
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.dmSans(
           color: const Color(0xFFB0B0B0),
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -313,7 +314,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textLight),
-        titleTextStyle: GoogleFonts.inter(
+        titleTextStyle: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontSize: 24,
           fontWeight: FontWeight.w800,
@@ -329,11 +330,11 @@ class AppTheme {
         showSelectedLabels: true,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.inter(
+        selectedLabelStyle: GoogleFonts.dmSans(
           fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
-        unselectedLabelStyle: GoogleFonts.inter(
+        unselectedLabelStyle: GoogleFonts.dmSans(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -363,11 +364,11 @@ class AppTheme {
             width: 2.5,
           ),
         ),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.dmSans(
           color: AppColors.textSecondary,
           fontWeight: FontWeight.w500,
         ),
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.dmSans(
           color: AppColors.textLight,
           fontWeight: FontWeight.w600,
         ),
@@ -382,7 +383,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.dmSans(
             fontWeight: FontWeight.w700,
             fontSize: 16,
             letterSpacing: 0.5,

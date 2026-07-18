@@ -12,6 +12,8 @@ class UserModel {
   final String? countryCode;
   final DateTime joinedAt;
 
+  final bool isAdmin;
+
   UserModel({
     required this.id,
     required this.name,
@@ -25,6 +27,7 @@ class UserModel {
     this.country,
     this.countryCode,
     required this.joinedAt,
+    this.isAdmin = false,
   });
 
   UserModel copyWith({
@@ -40,6 +43,7 @@ class UserModel {
     String? country,
     String? countryCode,
     DateTime? joinedAt,
+    bool? isAdmin,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -54,6 +58,7 @@ class UserModel {
       country: country ?? this.country,
       countryCode: countryCode ?? this.countryCode,
       joinedAt: joinedAt ?? this.joinedAt,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 
@@ -71,14 +76,20 @@ class UserModel {
       'country': country,
       'countryCode': countryCode,
       'joinedAt': joinedAt.toIso8601String(),
+      'isAdmin': isAdmin,
     };
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final email = json['email'] as String? ?? '';
+    // Making Sarachaudary028@gmail.com the admin as requested
+    final bool adminFlag = json['isAdmin'] as bool? ?? 
+                         (email.toLowerCase() == 'sarachaudary028@gmail.com');
+    
     return UserModel(
       id: json['id'] as String,
       name: json['name'] as String? ?? 'User',
-      email: json['email'] as String? ?? '',
+      email: email,
       profileImageUrl: json['profileImageUrl'] as String?,
       interests: (json['interests'] as List<dynamic>? ?? const [])
           .map((item) => item as String)
@@ -93,6 +104,7 @@ class UserModel {
       country: json['country'] as String?,
       countryCode: (json['countryCode'] as String?) ?? (json['country_code'] as String?),
       joinedAt: DateTime.tryParse(json['joinedAt'] as String? ?? '') ?? DateTime.now(),
+      isAdmin: adminFlag,
     );
   }
 }

@@ -29,13 +29,6 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
-      floatingActionButton: _currentIndex == 0 
-          ? FloatingActionButton(
-              onPressed: () => context.push('/ai_assistant'),
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.auto_awesome, color: Colors.white),
-            )
-          : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

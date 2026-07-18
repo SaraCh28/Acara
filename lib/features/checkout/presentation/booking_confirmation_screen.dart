@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../models/event_model.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/booking_service.dart';
@@ -27,14 +28,15 @@ class BookingConfirmationScreen extends ConsumerWidget {
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Booking not found'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.go('/home'),
-                  child: const Text('Back to Home'),
-                ),
-              ],
+               children: [
+                 const Text('Booking not found'),
+                 const SizedBox(height: 16),
+                 AppButton(
+                   label: 'Back to Home',
+                   onPressed: () => context.go('/home'),
+                   variant: AppButtonVariant.primary,
+                 ),
+               ],
             ),
           ),
         ),
@@ -128,28 +130,25 @@ class BookingConfirmationScreen extends ConsumerWidget {
                   ),
                 ),
 
-              const Spacer(),
+               const Spacer(),
 
-              ElevatedButton(
-                onPressed: () {
-                  context.pushNamed(
-                    'view_ticket',
-                    pathParameters: {'id': bookingId},
-                    extra: event,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('View Ticket'),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  context.go('/home');
-                },
-                child: const Text('Back to Home'),
-              ),
+               AppButton(
+                 label: 'View Ticket',
+                 onPressed: () {
+                   context.pushNamed(
+                     'view_ticket',
+                     pathParameters: {'id': bookingId},
+                     extra: event,
+                   );
+                 },
+                 variant: AppButtonVariant.primary,
+               ),
+               const SizedBox(height: 16),
+               AppButton(
+                 label: 'Back to Home',
+                 onPressed: () => context.go('/home'),
+                 variant: AppButtonVariant.secondary,
+               ),
               const SizedBox(height: AppConstants.paddingLarge),
             ],
           ),

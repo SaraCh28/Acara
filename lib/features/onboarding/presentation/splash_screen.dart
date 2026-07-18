@@ -45,17 +45,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await ref.read(appPreferencesProvider.notifier).restore();
     await ref.read(paymentMethodsProvider.notifier).restore();
     final user = await ref.read(currentUserProvider.notifier).restoreSession();
+    final prefs = ref.read(appPreferencesProvider);
+
     await Future<void>.delayed(const Duration(milliseconds: 1500));
     if (!mounted) {
       return;
     }
 
-    if (user == null) {
-      context.go('/onboarding');
+    if (user != null) {
+      context.go(resolvePostAuthRoute(user));
       return;
     }
 
-    context.go(resolvePostAuthRoute(user));
+    if (prefs.onboardingSeen) {
+      context.go('/login');
+    } else {
+      context.go('/onboarding');
+    }
   }
 
   @override

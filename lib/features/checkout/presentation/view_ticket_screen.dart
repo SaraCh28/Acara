@@ -1,24 +1,111 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/intl.dart';
+
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/event_model.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/event_service.dart';
-import 'package:intl/intl.dart';
 
-class ViewTicketScreen extends ConsumerWidget {
+// Safely import web-only tools
+import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart' as web_tools;
+
+class ViewTicketScreen extends ConsumerStatefulWidget {
   final String bookingId;
   final EventModel? initialEvent;
   const ViewTicketScreen({super.key, required this.bookingId, this.initialEvent});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ViewTicketScreen> createState() => _ViewTicketScreenState();
+}
+
+class _ViewTicketScreenState extends ConsumerState<ViewTicketScreen> {
+  final ScreenshotController _screenshotController = ScreenshotController();
+  bool _isDownloading = false;
+
+  Future<void> _downloadTicket(dynamic booking, EventModel event) async {
+    setState(() => _isDownloading = true);
+
+    try {
+      final Uint8List? imageBytes = await _screenshotController.capture(
+        delay: const Duration(milliseconds: 100),
+      );
+
+      if (imageBytes != null) {
+        if (kIsWeb) {
+          // Use the safe web download tool
+          await web_tools.downloadImageWeb(imageBytes, 'ticket_${widget.bookingId}.png');
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Ticket downloaded successfully!')),
+            );
+          }
+        } else {
+          // Mobile download
+          PermissionStatus status;
+          if (Platform.isAndroid) {
+            // On Android 13+ (API 33+), Permission.storage is deprecated.
+            // We request Permission.storage first, and if it fails, fallback to Permission.photos
+            status = await Permission.storage.request();
+            if (status.isDenied || status.isPermanentlyDenied) {
+              status = await Permission.photos.request();
+            }
+          } else {
+            status = await Permission.storage.request();
+          }
+
+          if (status.isGranted || status.isLimited) {
+            final result = await ImageGallerySaver.saveImage(
+              imageBytes,
+              name: 'ticket_${widget.bookingId}',
+              quality: 100,
+            );
+            if (mounted) {
+              if (result['isSuccess']) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ticket saved to gallery!')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to save ticket: ${result['errorMessage']}')),
+                );
+              }
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Storage permission denied. Please enable it in settings.')),
+              );
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error downloading ticket: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final allBookings = ref.watch(userBookingsProvider);
     final booking = allBookings.cast<dynamic>().firstWhere(
-      (b) => b?.id == bookingId,
+      (b) => b?.id == widget.bookingId,
       orElse: () => null,
     );
 
@@ -29,7 +116,9 @@ class ViewTicketScreen extends ConsumerWidget {
       );
     }
 
-    final event = initialEvent ?? ref.watch(eventByIdProvider(booking.eventId)) ?? ref.watch(checkoutEventProvider);
+    final event = widget.initialEvent ?? 
+                  ref.watch(eventByIdProvider(booking.eventId)) ?? 
+                  ref.watch(checkoutEventProvider);
 
     if (event == null) {
       return Scaffold(
@@ -64,248 +153,242 @@ class ViewTicketScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Top Event Info section
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(24),
-                          ),
-                          child: Hero(
-                            tag: 'event_image_${event.id}',
-                            child: Image.network(
-                              event.imageUrl,
-                              height: 180,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
+              Screenshot(
+                controller: _screenshotController,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Top Event Info section
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(24),
+                            ),
+                            child: Hero(
+                              tag: 'event_image_${event.id}',
+                              child: Image.network(
+                                event.imageUrl,
                                 height: 180,
-                                color: AppColors.border,
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  size: 40,
-                                  color: AppColors.textSecondary,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  height: 180,
+                                  color: AppColors.border,
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    size: 40,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(12),
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                event.category,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            child: Text(
-                              event.category,
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.title,
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                            _DetailRow(
+                              icon: Icons.calendar_today_outlined,
+                              text: DateFormat('EEEE, d MMMM yyyy').format(event.date),
+                            ),
+                            const SizedBox(height: 8),
+                            _DetailRow(
+                              icon: Icons.access_time_outlined,
+                              text: DateFormat('HH:mm').format(event.date),
+                            ),
+                            const SizedBox(height: 8),
+                            _DetailRow(
+                              icon: Icons.location_on_outlined,
+                              text: '${event.venue}, ${event.city}',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Dashed line divider with semi-circle cutouts
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Row(
+                            children: List.generate(
+                              30,
+                              (index) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                                  child: Container(
+                                    height: 1.5,
+                                    color: AppColors.border,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: -15,
+                            child: Container(
+                              height: 30,
+                              width: 30,
+                              decoration: const BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: -15,
+                            child: Container(
+                              height: 30,
+                              width: 30,
+                              decoration: const BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Bottom QR Section
+                      Padding(
+                        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                        child: Column(
+                          children: [
+                            QrImageView(
+                              data: booking.ticketCode,
+                              version: QrVersions.auto,
+                              size: 180,
+                              eyeStyle: const QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: Colors.black,
+                              ),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              booking.ticketCode,
                               style: const TextStyle(
-                                color: AppColors.primary,
+                                letterSpacing: 4,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                color: AppColors.textPrimary,
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event.title,
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 16),
-                          _DetailRow(
-                            icon: Icons.calendar_today_outlined,
-                            text: DateFormat('EEEE, d MMMM yyyy').format(event.date),
-                          ),
-                          const SizedBox(height: 8),
-                          _DetailRow(
-                            icon: Icons.access_time_outlined,
-                            text: DateFormat('HH:mm').format(event.date),
-                          ),
-                          const SizedBox(height: 8),
-                          _DetailRow(
-                            icon: Icons.location_on_outlined,
-                            text: '${event.venue}, ${event.city}',
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Dashed line divider with semi-circle cutouts
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Row(
-                          children: List.generate(
-                            30,
-                            (index) => Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 2),
-                                child: Container(
-                                  height: 1.5,
-                                  color: AppColors.border,
-                                ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Scan this QR code at the event entrance',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                            ),
+                            const SizedBox(height: 24),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  _TicketInfoColumn(
+                                    label: 'TYPE',
+                                    value: booking.vipTicketCount > 0 ? 'VIP' : 'REGULAR',
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 30,
+                                    color: AppColors.border,
+                                  ),
+                                  _TicketInfoColumn(
+                                    label: 'QUANTITY',
+                                    value: '${booking.ticketCount} Tix',
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 30,
+                                    color: AppColors.border,
+                                  ),
+                                  _TicketInfoColumn(
+                                    label: 'STATUS',
+                                    value: booking.status.toUpperCase(),
+                                    color: booking.status == 'confirmed'
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                        Positioned(
-                          left: -15,
-                          child: Container(
-                            height: 30,
-                            width: 30,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surface,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: -15,
-                          child: Container(
-                            height: 30,
-                            width: 30,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surface,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Bottom QR Section
-                    Padding(
-                      padding: const EdgeInsets.all(AppConstants.paddingLarge),
-                      child: Column(
-                        children: [
-                          QrImageView(
-                            data: booking.ticketCode,
-                            version: QrVersions.auto,
-                            size: 180,
-                            eyeStyle: const QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: Colors.black,
-                            ),
-                            dataModuleStyle: const QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            booking.ticketCode,
-                            style: const TextStyle(
-                              letterSpacing: 4,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Scan this QR code at the event entrance',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                          ),
-                          const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _TicketInfoColumn(
-                                  label: 'TYPE',
-                                  value: booking.vipTicketCount > 0 ? 'VIP' : 'REGULAR',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 30,
-                                  color: AppColors.border,
-                                ),
-                                _TicketInfoColumn(
-                                  label: 'QUANTITY',
-                                  value: '${booking.ticketCount} Tix',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 30,
-                                  color: AppColors.border,
-                                ),
-                                _TicketInfoColumn(
-                                  label: 'STATUS',
-                                  value: booking.status.toUpperCase(),
-                                  color: booking.status == 'confirmed'
-                                      ? Colors.green
-                                      : Colors.red,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.download),
-                      label: const Text('Download'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isDownloading ? null : () => _downloadTicket(booking, event),
+                  icon: _isDownloading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.download),
+                  label: Text(_isDownloading ? 'Downloading...' : 'Download Ticket'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.event),
-                      label: const Text('Add to Calendar'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(height: 100),
             ],

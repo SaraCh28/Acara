@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui';
 
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
@@ -50,50 +51,41 @@ class _HorizontalEventCard extends ConsumerWidget {
               event.lookupIds.contains(bookmark.eventId),
         );
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceWhite,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(
-                AppConstants.borderRadiusMedium,
-              ),
-              child: SizedBox(
-                width: 110,
-                height: 112,
-                child: Stack(
-                  fit: StackFit.expand,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Stack(
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: event.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, _) => Container(
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (context, _, __) => Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported_outlined),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: CachedNetworkImage(
+                        imageUrl: event.imageUrl,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
                       ),
                     ),
                     Positioned(
-                      top: 8,
-                      left: 8,
+                      top: 6,
+                      left: 6,
                       child: _SourceBadge(
                         label: event.sourceBadgeLabel,
                         compact: true,
@@ -101,79 +93,110 @@ class _HorizontalEventCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${DateFormat('EEE, d MMM').format(event.date)} • ${event.startTime}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_today_outlined, 
+                               size: 12, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${DateFormat('EEE, d MMM').format(event.date)} • ${event.startTime}',
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      event.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(height: 6),
+                      Text(
+                        event.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${event.venue}, ${event.city}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Text(
-                          event.price == 0
-                              ? 'Free'
-                              : '\$${event.price.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, 
+                               size: 13, color: AppColors.textSecondary),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              '${event.venue}, ${event.city}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
                               ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          _distanceLabel(currentUser, event),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            event.price == 0
+                                ? 'FREE'
+                                : '\$${event.price.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            _distanceLabel(currentUser, event),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textHint,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Material(
+                  color: isBookmarked ? AppColors.accent.withValues(alpha: 0.1) : Colors.transparent,
+                  shape: const CircleBorder(),
+                  child: IconButton(
+                    onPressed: currentUser == null
+                        ? null
+                        : () {
+                            ref
+                                .read(userBookmarksProvider.notifier)
+                                .toggleBookmark(
+                                  currentUser.id,
+                                  event.id,
+                                  alternateEventIds: event.lookupIds.skip(1),
+                                );
+                          },
+                    icon: Icon(
+                      isBookmarked ? Icons.favorite : Icons.favorite_border,
+                      size: 22,
+                      color: isBookmarked ? AppColors.accent : AppColors.textHint,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            IconButton(
-              onPressed: currentUser == null
-                  ? null
-                  : () {
-                      ref
-                          .read(userBookmarksProvider.notifier)
-                                      .toggleBookmark(
-                                        currentUser.id,
-                                        event.id,
-                                        alternateEventIds: event.lookupIds.skip(1),
-                                      );
-                    },
-              icon: Icon(
-                isBookmarked ? Icons.favorite : Icons.favorite_border,
-                color: isBookmarked ? Colors.redAccent : AppColors.textHint,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -198,122 +221,89 @@ class _VerticalEventCard extends ConsumerWidget {
               event.lookupIds.contains(bookmark.eventId),
         );
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-      child: SizedBox(
-        width: 260,
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(
-                AppConstants.borderRadiusLarge,
-              ),
-              child: CachedNetworkImage(
-                imageUrl: event.imageUrl,
-                width: 260,
-                height: 320,
-                fit: BoxFit.cover,
-                placeholder: (context, _) => Container(
-                  width: 260,
-                  height: 320,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                errorWidget: (context, _, __) => Container(
-                  width: 260,
-                  height: 320,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported_outlined),
-                ),
-              ),
+            CachedNetworkImage(
+              imageUrl: event.imageUrl,
+              width: 280,
+              height: 380,
+              fit: BoxFit.cover,
             ),
             Container(
-              width: 260,
-              height: 320,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                  AppConstants.borderRadiusLarge,
-                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
+                  stops: const [0.5, 1.0],
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.18),
-                    Colors.black.withValues(alpha: 0.82),
+                    Colors.black.withValues(alpha: 0.9),
                   ],
                 ),
               ),
             ),
+            // Header Info Badges
             Positioned(
-              top: 14,
-              left: 14,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          DateFormat('d').format(event.date),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        color: Colors.white.withValues(alpha: 0.2),
+                        child: Column(
+                          children: [
+                            Text(
+                              DateFormat('d').format(event.date),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('MMM').format(event.date).toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          DateFormat('MMM').format(event.date),
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
                   _SourceBadge(label: event.sourceBadgeLabel),
                 ],
               ),
             ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Material(
-                color: Colors.white.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(20),
-                child: IconButton(
-                  onPressed: currentUser == null
-                      ? null
-                      : () {
-                          ref
-                              .read(userBookmarksProvider.notifier)
-                              .toggleBookmark(
-                                currentUser.id,
-                                event.id,
-                                alternateEventIds: event.lookupIds.skip(1),
-                              );
-                        },
-                  icon: Icon(
-                    isBookmarked ? Icons.favorite : Icons.favorite_border,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            // Content
             Positioned(
               left: 16,
               right: 16,
-              bottom: 16,
+              bottom: 20,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -323,46 +313,99 @@ class _VerticalEventCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      height: 1.2,
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${event.venue}, ${event.city}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Text(
-                        event.price == 0
-                            ? 'Free'
-                            : '\$${event.price.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
+                      const Icon(Icons.location_on, color: AppColors.coolSky, size: 16),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          '${event.venue}, ${event.city}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.coolSky,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          event.price == 0 ? 'FREE' : '\$${event.price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: AppColors.trueCobalt,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                       const Spacer(),
                       Text(
                         _distanceLabel(currentUser, event),
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: onTap,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 44),
-                    ),
-                    child: const Text('View Details'),
-                  ),
                 ],
+              ),
+            ),
+            // Bookmark Toggle
+            Positioned(
+              bottom: 120,
+              right: 16,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: GestureDetector(
+                    onTap: currentUser == null
+                        ? null
+                        : () {
+                            ref
+                                .read(userBookmarksProvider.notifier)
+                                .toggleBookmark(
+                                  currentUser.id,
+                                  event.id,
+                                  alternateEventIds: event.lookupIds.skip(1),
+                                );
+                          },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      color: Colors.white.withValues(alpha: 0.2),
+                      child: Icon(
+                        isBookmarked ? Icons.favorite : Icons.favorite_border,
+                        color: isBookmarked ? AppColors.accent : Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Tap area
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(onTap: onTap),
               ),
             ),
           ],
@@ -395,37 +438,29 @@ class _SourceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final badgeColor = _sourceColor(label);
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 10,
-        vertical: compact ? 4 : 5,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.68),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: badgeColor.withValues(alpha: 0.85), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: compact ? 6 : 7,
-            height: compact ? 6 : 7,
-            decoration: BoxDecoration(
-              color: badgeColor,
-              shape: BoxShape.circle,
-            ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(compact ? 8 : 12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 8 : 12,
+            vertical: compact ? 4 : 6,
           ),
-          const SizedBox(width: 6),
-          Text(
-            label,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.4),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+          ),
+          child: Text(
+            label.toUpperCase(),
             style: TextStyle(
               color: Colors.white,
-              fontSize: compact ? 10 : 11,
-              fontWeight: FontWeight.w700,
+              fontSize: compact ? 8 : 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -440,4 +475,3 @@ Color _sourceColor(String label) {
   if (normalized.contains('local')) return const Color(0xFF8E63FF);
   return Colors.white;
 }
-

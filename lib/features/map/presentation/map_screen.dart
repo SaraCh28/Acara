@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../models/event_model.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
@@ -378,15 +379,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton(
+                          child: AppButton(
+                            label: 'View Details',
                             onPressed: () => context
                                 .push('/event/${_selectedEvent!.id}'),
-                            child: const Text('View Details'),
+                            variant: AppButtonVariant.secondary,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton(
+                          child: AppButton(
+                            label: 'Get Directions',
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -396,7 +399,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                 ),
                               );
                             },
-                            child: const Text('Get Directions'),
+                            variant: AppButtonVariant.primary,
                           ),
                         ),
                       ],

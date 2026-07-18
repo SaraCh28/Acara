@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../models/event_model.dart';
 import '../../../services/event_service.dart';
 import '../../../services/checkout_service.dart';
@@ -144,13 +145,11 @@ class _ContactInfoScreenState extends ConsumerState<ContactInfoScreen> {
                   value == null || value.isEmpty ? 'Please enter your phone number' : null,
               ),
               const SizedBox(height: 32),
-              
-              ElevatedButton(
+
+              AppButton(
+                label: 'Continue to Payment',
                 onPressed: _onContinue,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Continue to Payment'),
+                variant: AppButtonVariant.primary,
               ),
             ],
           ),

@@ -6,6 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/modern_button.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_input.dart';
 import '../../../core/widgets/gradient_background.dart';
 import '../../../services/auth_service.dart';
 
@@ -20,7 +22,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _rememberMe = false;
   bool _isLoading = false;
+  bool _isAdminMode = false;
 
   @override
   void dispose() {
@@ -42,11 +47,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(currentUserProvider.notifier).setUser(user);
 
       if (mounted) {
-        // If profile has no name, send to name selection first
-        if (user.name == 'User' || user.name == user.email.split('@').first) {
-          context.go('/name_selection');
+        if (_isAdminMode) {
+          if (user.isAdmin) {
+            context.go('/admin');
+          } else {
+             // Use the standard logout method which clears both Supabase and Riverpod state
+             await ref.read(currentUserProvider.notifier).logout();
+
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(content: Text('Access Denied: This account is not an admin.')),
+             );
+          }
         } else {
-          context.go('/home');
+          // Normal user flow
+          if (user.name == 'User' || user.name == user.email.split('@').first) {
+            context.go('/name_selection');
+          } else {
+            context.go('/home');
+          }
         }
       }
     } on AuthException catch (error) {
@@ -101,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Discover Amazing Events',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withAlpha((0.9 * 255).round()),
                     fontSize: 18,
                   ),
                 )
@@ -109,235 +127,96 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     .fadeIn(duration: 600.ms)
                     .slideY(begin: -0.3),
                 const SizedBox(height: 60),
-                // Form Card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 30,
-                        offset: const Offset(0, 15),
-                      ),
-                    ],
-                  ),
+                // Form Card (refactored to use AppCard and AppInput)
+                AppCard(
+                  color: Colors.white.withAlpha((0.95 * 255).round()),
+                  radius: 28,
                   padding: const EdgeInsets.all(AppConstants.paddingLarge),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        Text(
-                          'Welcome Back',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                            .animate(delay: 200.ms)
-                            .fadeIn(duration: 600.ms),
+                        Text(_isAdminMode ? 'Admin Portal' : 'Welcome Back', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700)).animate(delay: 200.ms).fadeIn(duration: 600.ms),
                         const SizedBox(height: 8),
-                        Text(
-                          'Sign in to continue',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        )
-                            .animate(delay: 300.ms)
-                            .fadeIn(duration: 600.ms),
+                        Text(_isAdminMode ? 'Authorized personnel only' : 'Sign in to continue', style: Theme.of(context).textTheme.bodyMedium).animate(delay: 300.ms).fadeIn(duration: 600.ms),
                         const SizedBox(height: 24),
-                        // Email Field
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            hintText: 'Email address',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                        // Mode Toggle
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.border),
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            final email = value?.trim() ?? '';
-                            if (email.isEmpty || !email.contains('@')) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
-                        )
-                            .animate(delay: 400.ms)
-                            .fadeIn(duration: 500.ms)
-                            .slideY(begin: 0.2),
-                        const SizedBox(height: 16),
-                        // Password Field
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          obscureText: true,
-                          validator: (value) {
-                            if ((value ?? '').isEmpty) {
-                              return 'Enter your password';
-                            }
-                            return null;
-                          },
-                        )
-                            .animate(delay: 500.ms)
-                            .fadeIn(duration: 500.ms)
-                            .slideY(begin: 0.2),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => context.push('/forgot_password'),
-                            child: Text(
-                              'Forgot password?',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppColors.primary,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => setState(() => _isAdminMode = false),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: !_isAdminMode ? AppColors.primary : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'User',
+                                        style: TextStyle(
+                                          color: !_isAdminMode ? Colors.white : AppColors.textPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          )
-                              .animate(delay: 600.ms)
-                              .fadeIn(duration: 500.ms),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => setState(() => _isAdminMode = true),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: _isAdminMode ? AppColors.secondary : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Admin',
+                                        style: TextStyle(
+                                          color: _isAdminMode ? Colors.white : AppColors.textPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 24),
-                        ModernButton(
-                          text: 'Login',
-                          onPressed: _login,
-                          isLoading: _isLoading,
-                          isPrimary: true,
-                        )
-                            .animate(delay: 700.ms)
-                            .fadeIn(duration: 500.ms)
-                            .slideY(begin: 0.2),
+                        AppInput(controller: _emailController, hintText: 'Email address', prefixIcon: const Icon(Icons.email_outlined)).animate(delay: 400.ms).fadeIn(duration: 500.ms).slideY(begin: 0.2),
+                        const SizedBox(height: 16),
+                        AppInput(controller: _passwordController, hintText: 'Password', obscureText: _obscurePassword, prefixIcon: const Icon(Icons.lock_outline), suffixIcon: IconButton(icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility), onPressed: () => setState(() => _obscurePassword = !_obscurePassword))).animate(delay: 500.ms).fadeIn(duration: 500.ms).slideY(begin: 0.2),
+                        const SizedBox(height: 12),
+                        Align(alignment: Alignment.centerRight, child: TextButton(onPressed: () => context.push('/forgot_password'), child: Text('Forgot password?', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.primary))).animate(delay: 600.ms).fadeIn(duration: 500.ms)),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Checkbox(value: _rememberMe, onChanged: (v) => setState(() => _rememberMe = v ?? false)),
+                            const SizedBox(width: 8),
+                            const Text('Remember me'),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ModernButton(text: 'Login', onPressed: _login, isLoading: _isLoading, isPrimary: true).animate(delay: 700.ms).fadeIn(duration: 500.ms).slideY(begin: 0.2),
                       ],
                     ),
                   ),
-                )
-                    .animate(delay: 200.ms)
-                    .fadeIn(duration: 600.ms)
-                    .slideY(begin: 0.3),
+                ).animate(delay: 200.ms).fadeIn(duration: 600.ms).slideY(begin: 0.3),
                 const SizedBox(height: 32),
-                // Divider
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(height: 1, color: Colors.white.withOpacity(0.3)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'or',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.7),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(height: 1, color: Colors.white.withOpacity(0.3)),
-                    ),
-                  ],
-                )
-                    .animate(delay: 800.ms)
-                    .fadeIn(duration: 500.ms),
-                const SizedBox(height: 24),
-                // Social Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _SocialButton(
-                      icon: Icons.g_mobiledata,
-                      label: 'Google',
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Google login coming soon'),
-                          ),
-                        );
-                      },
-                    )
-                        .animate(delay: 900.ms)
-                        .fadeIn(duration: 500.ms)
-                        .slideX(begin: -0.2),
-                    const SizedBox(width: 16),
-                    _SocialButton(
-                      icon: Icons.apple,
-                      label: 'Apple',
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Apple login coming soon'),
-                          ),
-                        );
-                      },
-                    )
-                        .animate(delay: 1000.ms)
-                        .fadeIn(duration: 500.ms)
-                        .slideX(begin: 0.2),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Demo Credentials Info
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '📋 Demo Credentials',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'demo@acara.app',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      Text(
-                        'acara123',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                )
-                    .animate(delay: 1100.ms)
-                    .fadeIn(duration: 500.ms),
-                const SizedBox(height: 24),
-                // Sign up Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account? ",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.push('/signup'),
-                      child: Text(
-                        'Sign up',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-                    .animate(delay: 1200.ms)
-                    .fadeIn(duration: 500.ms),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text("Don't have an account? ", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white.withAlpha((0.8 * 255).round()))), TextButton(onPressed: () => context.push('/signup'), child: Text('Sign up', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)))]).animate(delay: 1200.ms).fadeIn(duration: 500.ms),
                 const SizedBox(height: 20),
               ],
             ),
@@ -376,13 +255,13 @@ class _SocialButtonState extends State<_SocialButton> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.textSecondary.withOpacity(_isHovered ? 0.4 : 0.2),
+            color: AppColors.textSecondary.withAlpha(((_isHovered ? 0.4 : 0.2) * 255).round()),
             width: 2,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: AppColors.textSecondary.withOpacity(0.1),
+                    color: AppColors.textSecondary.withAlpha((0.1 * 255).round()),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),

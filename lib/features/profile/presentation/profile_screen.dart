@@ -148,6 +148,15 @@ class ProfileScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
+                   if (user.isAdmin)
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.admin_panel_settings_outlined,
+                      title: 'Admin Panel',
+                      iconColor: AppColors.primary,
+                      textColor: AppColors.primary,
+                      onTap: () => context.push('/admin'),
+                    ),
                   _buildMenuItem(
                     context,
                     icon: Icons.calendar_month_outlined,

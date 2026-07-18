@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/checkout_service.dart';
 import '../../../services/event_service.dart';
 import '../../../services/auth_service.dart';
@@ -39,15 +40,14 @@ class EventDetailScreen extends ConsumerWidget {
     }
 
     final currentUser = ref.watch(currentUserProvider);
-    final isBookmarked = currentUser != null
-        ? ref
-              .watch(userBookmarksProvider.notifier)
-              .isBookmarked(
-                currentUser.id,
-                event.id,
-                alternateEventIds: event.lookupIds.skip(1),
-              )
-        : false;
+    // Watching the state directly to ensure the widget rebuilds when bookmarks change
+    final bookmarks = ref.watch(userBookmarksProvider);
+    final isBookmarked = currentUser != null && 
+        ref.read(userBookmarksProvider.notifier).isBookmarked(
+              currentUser.id,
+              event.id,
+              alternateEventIds: event.lookupIds.skip(1),
+            );
 
     return Scaffold(
       body: Stack(
@@ -76,8 +76,7 @@ class EventDetailScreen extends ConsumerWidget {
                             colors: [
                               Colors.black.withValues(alpha: 0.4),
                               Colors.transparent,
-                              Colors
-                                  .white, // Blends into the background at the bottom
+                              AppColors.backgroundLight, // Blends into the background at the bottom
                             ],
                             stops: const [0.0, 0.5, 1.0],
                           ),
@@ -95,31 +94,29 @@ class EventDetailScreen extends ConsumerWidget {
                               icon: Icons.arrow_back,
                               onTap: () => _goBack(context),
                             ),
-                            Row(
-                              children: [
-                                _GlassButton(
-                                  icon: isBookmarked
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: isBookmarked
-                                      ? AppColors.primary
-                                      : Colors.white,
-                                  onTap: () {
-                                    if (currentUser != null) {
-                                      ref
-                                          .read(userBookmarksProvider.notifier)
-                                          .toggleBookmark(
-                                            currentUser.id,
-                                            event.id,
-                                            alternateEventIds:
-                                                event.lookupIds.skip(1),
-                                          );
-                                    }
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                _GlassButton(icon: Icons.share, onTap: () {}),
-                              ],
+                            _GlassButton(
+                              icon: isBookmarked
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isBookmarked
+                                  ? Colors.red
+                                  : Colors.white,
+                              onTap: () {
+                                if (currentUser != null) {
+                                  ref
+                                      .read(userBookmarksProvider.notifier)
+                                      .toggleBookmark(
+                                        currentUser.id,
+                                        event.id,
+                                        alternateEventIds:
+                                            event.lookupIds.skip(1),
+                                      );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please log in to bookmark events')),
+                                  );
+                                }
+                              },
                             ),
                           ],
                         ),
@@ -237,7 +234,7 @@ class EventDetailScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(AppConstants.paddingLarge),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -269,16 +266,17 @@ class EventDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: AppConstants.paddingLarge),
                     Expanded(
-                      child: ElevatedButton(
+                      child: AppButton(
+                        label: 'Buy Ticket',
                         onPressed: () {
                           ref.read(checkoutEventProvider.notifier).setEvent(event);
-                          context.goNamed(
+                          context.pushNamed(
                             'booking',
                             pathParameters: {'id': event.id},
                             extra: event,
                           );
                         },
-                        child: const Text('Buy Ticket'),
+                        variant: AppButtonVariant.primary,
                       ),
                     ),
                   ],

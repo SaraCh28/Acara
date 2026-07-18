@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_input.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../services/auth_service.dart';
 
 class NameAvatarSelectionScreen extends ConsumerStatefulWidget {
@@ -109,28 +111,20 @@ class _NameAvatarSelectionScreenState
               ),
               const SizedBox(height: 40),
               
-              // Name Input
-              Text(
-                'What should we call you?',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Full Name',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              
+               // Name Input
+               Text(
+                 'What should we call you?',
+                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                       fontWeight: FontWeight.bold,
+                     ),
+               ),
+               const SizedBox(height: 12),
+               AppInput(
+                 controller: _nameController,
+                 hintText: 'Enter your name',
+                 prefixIcon: const Icon(Icons.person_outline),
+               ),
+
               const SizedBox(height: 40),
               
               // Avatar Selection
@@ -185,33 +179,15 @@ class _NameAvatarSelectionScreenState
                 },
               ),
               
-              const SizedBox(height: 60),
-              
-              // Continue Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-              ),
+               const SizedBox(height: 60),
+
+               // Continue Button
+               AppButton(
+                 label: 'Continue',
+                 onPressed: _isLoading ? null : _saveProfile,
+                 loading: _isLoading,
+                 variant: AppButtonVariant.primary,
+               ),
               const SizedBox(height: 20),
             ],
           ),

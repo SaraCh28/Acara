@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/event_model.dart';
+import 'event_api_service.dart';
 import 'events_notifier.dart';
 
 /// Legacy service, now mostly replaced by [EventApiService] and [EventsNotifier].
@@ -19,11 +20,39 @@ final eventsProvider = Provider<List<EventModel>>((ref) {
 /// Returns a specific event by ID, searching the current list and the session cache.
 final eventByIdProvider = Provider.family<EventModel?, String>((ref, id) {
   final allEvents = ref.watch(eventsProvider);
-  final matches = allEvents.where((e) => e.lookupIds.contains(id));
-  if (matches.isNotEmpty) return matches.first;
   
-  // Fallback to session cache
+  // Search in allEvents
+  for (final e in allEvents) {
+    if (e.id == id || e.legacyId == id || e.lookupIds.contains(id)) {
+      return e;
+    }
+  }
+  
+  // Fallback to session cache in EventsNotifier
   return EventsNotifier.getEvent(id);
+});
+
+/// Fetches a specific event by ID from the API if not found in local state.
+final asyncEventByIdProvider = FutureProvider.family<EventModel?, String>((ref, id) async {
+  // Check local first
+  final local = ref.read(eventByIdProvider(id));
+  if (local != null) return local;
+
+  // Fetch from API using the ID as keyword
+  final api = ref.read(eventApiServiceProvider);
+  final results = await api.fetchEvents(keyword: id);
+  
+  if (results.isNotEmpty) {
+    // Aggregator might return multiple, we look for the best match
+    for (final e in results) {
+      if (e.id == id || e.legacyId == id || e.lookupIds.contains(id)) {
+         return e;
+      }
+    }
+    return results.first;
+  }
+  
+  return null;
 });
 
 /// Legacy city filter provider.
